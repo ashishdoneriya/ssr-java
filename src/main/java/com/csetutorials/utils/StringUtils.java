@@ -1,5 +1,6 @@
 package com.csetutorials.utils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,9 @@ public class StringUtils {
 	}
 
 	public static List<String> parseList(String str) {
+		if (str == null) {
+			return new ArrayList<>(1);
+		}
 		return Constants.gson.fromJson(str, Constants.stringListType);
 	}
 
@@ -70,6 +74,9 @@ public class StringUtils {
 			String value = temp3.substring(temp3.indexOf(":") + 1).trim();
 			if (value.isEmpty()) {
 				continue;
+			}
+			if (value.startsWith("\"")) {
+				value = value.substring(1, value.length() - 1);
 			}
 			map.put(key, value);
 		}

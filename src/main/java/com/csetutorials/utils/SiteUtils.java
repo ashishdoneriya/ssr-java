@@ -171,7 +171,7 @@ public class SiteUtils {
 	public static void generateTagsPages(SiteConfig siteConfig, Map<CatTag, List<Page>> tagsWithRelatedPosts)
 			throws FileNotFoundException {
 		String layoutsDir = siteConfig.getLayoutsDir();
-		if (!new File(layoutsDir + File.separator + siteConfig.getCategoriesLayout()).exists()) {
+		if (!new File(layoutsDir + File.separator + siteConfig.getTagsLayout()).exists()) {
 			return;
 		}
 
@@ -246,7 +246,7 @@ public class SiteUtils {
 				continue;
 			}
 			Map<String, Object> map = createMap(page);
-			context.put(isPost ? "post" : "page", map);
+			context.put("page", map);
 			String content = StringUtils.getContentBody(FileUtils.getString(page.getFile()));
 			if (page.getFile().getName().endsWith(".md") || page.getFile().getName().endsWith(".markdown")) {
 				content = TemplateUtils.parseMarkdown(content);
@@ -254,7 +254,7 @@ public class SiteUtils {
 			TemplateUtils.addTemplate(siteConfig, "test-template-ssr", content);
 			content = TemplateUtils.formatContent(engine, context, "test-template-ssr");
 			map.put("content", content);
-			context.put(isPost ? "post" : "page", map);
+			context.put("page", map);
 			String postLayoutContent = TemplateUtils.formatContent(engine, context, page.getLayout());
 			write(page.getPermalink(), postLayoutContent, siteConfig,
 					isPost ? siteConfig.isPostUglyUrlEnabled() : siteConfig.isPageUglyUrlEnabled());

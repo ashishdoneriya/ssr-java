@@ -15,7 +15,7 @@ public class DataUtils {
 		File dir = new File(dataDir);
 		Map<String, Object> map = new HashMap<>();
 		if (!dir.exists() || dir.list().length == 0) {
-			return;
+			siteConfig.setData(new HashMap<String, Object>(1));
 		}
 		for (File file : dir.listFiles()) {
 			if (file.isFile()) {

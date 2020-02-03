@@ -121,7 +121,7 @@ public class PageUtils {
 		// Setting layout
 		String layout = rawParams.get("layout");
 		if (StringUtils.isBlank(layout)) {
-			layout = siteConfig.getPostLayout();
+			layout = isPost ? siteConfig.getPostLayout() : siteConfig.getPageLayout();
 
 		}
 		page.setLayout(layout);
@@ -181,7 +181,7 @@ public class PageUtils {
 				tagObj.setName(StringUtils.toFirstCharUpperAll(sTag));
 				String url = siteConfig.getBaseUrl() + "/" + siteConfig.getTagBase() + "/" + sTag;
 				tagObj.setUrl(url);
-				tags.add(tag);
+				tags.add(tagObj);
 				tagsMap.put(sTag, tagObj);
 			}
 		}
@@ -203,9 +203,10 @@ public class PageUtils {
 				CatTag catObj = new CatTag();
 				catObj.setShortcode(sCat);
 				catObj.setName(StringUtils.toFirstCharUpperAll(sCat));
-				String url = siteConfig.getBaseUrl() + "/" + siteConfig.getCategoryBase() + "/" + sCat;
+				String url = StringUtils
+						.removeExtraSlash(siteConfig.getBaseUrl() + "/" + siteConfig.getCategoryBase() + "/" + sCat);
 				catObj.setUrl(url);
-				categories.add(tag);
+				categories.add(catObj);
 				catsMap.put(sCat, catObj);
 			}
 		}
@@ -214,14 +215,14 @@ public class PageUtils {
 
 	private static String createUrl(String baseUrl, String postPermalink) {
 		// TODO : Added more
-		return (baseUrl + postPermalink).replaceAll("/+", "/");
+		return StringUtils.removeExtraSlash(baseUrl + postPermalink);
 
 	}
 
 	private static String formatPermalink(Page page, String permalink) {
 		String slug = page.getSlug();
 		// TODO : Added more
-		return page.getPermalink().replaceAll(":slug", slug).replaceAll("/+", "/");
+		return permalink.replaceAll(":slug", slug).replaceAll("/+", "/");
 	}
 
 	public static Set<String> extractLayouts(List<Page> pages) {

@@ -246,7 +246,7 @@ public class SiteConfig {
 		this.tempDir = StringUtils.removeExtraSlash(this.root + File.separator + this.tempDir);
 		this.staticContentDir = StringUtils.removeExtraSlash(this.root + File.separator + this.staticContentDir);
 		this.tempLayoutsPath = StringUtils.removeExtraSlash(this.tempDir + File.separator + "layouts");
-		this.dataDir = StringUtils.removeExtraSlash(this.dataDir + File.separator + "data");
+		this.dataDir = StringUtils.removeExtraSlash(this.root + File.separator + this.dataDir);
 	}
 
 	public String getTempLayoutsPath() {

@@ -75,6 +75,9 @@ public class TemplateUtils {
 					new File(siteConfig.getTempLayoutsPath() + File.separator + layoutFile.getName()));
 		}
 		for (String templateFileName : layouts) {
+			if (!new File(siteConfig.getLayoutsDir() + File.separator + templateFileName).exists()) {
+				continue;
+			}
 			String templateContent = generateTemplate(siteConfig.getLayoutsDir() + File.separator, templateFileName);
 			FileUtils.write(siteConfig.getTempLayoutsPath() + File.separator + templateFileName, templateContent);
 		}
