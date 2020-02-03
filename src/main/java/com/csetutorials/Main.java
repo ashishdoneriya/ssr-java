@@ -43,7 +43,7 @@ public class Main {
 		layouts.addAll(PageUtils.extractLayouts(posts));
 		layouts.addAll(PageUtils.extractLayouts(pages));
 		layouts.addAll(otherLayouts(siteConfig));
-		SiteUtils.createLayouts(siteConfig, layouts);
+		TemplateUtils.createLayouts(siteConfig, layouts);
 
 		TemplateUtils.setEngine(siteConfig);
 		Map<CatTag, List<Page>> tagsPosts = PageUtils.extractTagsWithRelatedPosts(posts);

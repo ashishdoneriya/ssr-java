@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -38,41 +37,6 @@ public class SiteUtils {
 		config.setRawConfig(rawConfig);
 		config.setRoot(root);
 		return config;
-	}
-
-	/*
-	 * public static VelocityEngine getVelocityEngine(SiteConfig siteConfig) {
-	 * VelocityEngine engine = new VelocityEngine();
-	 * engine.setProperty(RuntimeConstants.RESOURCE_LOADER, "file");
-	 * engine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH,
-	 * siteConfig.getTempLayoutsPath()); return engine; }
-	 */
-
-	public static void createLayouts(SiteConfig siteConfig, Set<String> layouts) throws IOException {
-		List<File> layoutsList = FileUtils.getFilesRecursively(siteConfig.getLayoutsDir());
-		for (File layoutFile : layoutsList) {
-			FileUtils.copyFile(layoutFile,
-					new File(siteConfig.getTempLayoutsPath() + File.separator + layoutFile.getName()));
-		}
-		for (String templateFileName : layouts) {
-			String templateContent = SiteUtils.generateTemplate(siteConfig.getLayoutsDir() + File.separator,
-					templateFileName);
-			FileUtils.write(siteConfig.getTempLayoutsPath() + File.separator + templateFileName, templateContent);
-		}
-	}
-
-	private static String generateTemplate(String layoutPath, String templateName) throws IOException {
-		String fileContent = FileUtils.getString(layoutPath + templateName);
-		while (true) {
-
-			Map<String, String> params = StringUtils.getRawParams(fileContent);
-			if (params == null || params.isEmpty() || !params.containsKey("layout")) {
-				return fileContent;
-			}
-			templateName = params.get("layout");
-			String parentContent = FileUtils.getString(layoutPath + templateName);
-			fileContent = parentContent.replace("REPLACE_ME_SSR", StringUtils.getContentBody(fileContent));
-		}
 	}
 
 	private static Map<String, Object> createMap(Page page) throws IOException {
