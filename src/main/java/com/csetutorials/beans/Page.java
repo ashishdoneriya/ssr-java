@@ -32,6 +32,8 @@ public class Page {
 
 	private transient File file;
 
+	private Page next, previous;
+
 	public String getTitle() {
 		return title;
 	}
@@ -142,6 +144,22 @@ public class Page {
 
 	public void setCategories(List<CatTag> categories) {
 		this.categories = categories;
+	}
+
+	public Page getNext() {
+		return next;
+	}
+
+	public void setNext(Page next) {
+		this.next = next;
+	}
+
+	public Page getPrevious() {
+		return previous;
+	}
+
+	public void setPrevious(Page previous) {
+		this.previous = previous;
 	}
 
 }

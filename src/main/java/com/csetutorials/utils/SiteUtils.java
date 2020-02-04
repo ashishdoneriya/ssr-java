@@ -353,7 +353,7 @@ public class SiteUtils {
 						+ File.separator + siteConfig.getAuthorBase() + File.separator + authorName + File.separator
 						+ (i == 1 ? "index.html" : "/page" + File.separator + i + File.separator + "index.html");
 				context.put("paginator", paginator);
-				context.put("author", authorName);
+				context.put("author", list.get(0).getAuthor());
 				String pageLayoutContent = TemplateUtils.formatContent(engine, context, siteConfig.getAuthorLayout());
 				FileUtils.write(currentPageFilePath, pageLayoutContent);
 			}

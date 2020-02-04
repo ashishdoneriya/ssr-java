@@ -30,9 +30,20 @@ public class PageUtils {
 		Collections.sort(posts, new Comparator<Page>() {
 			@Override
 			public int compare(Page page1, Page page2) {
+				if (page1.getCreated() == null || page2.getCreated() == null) {
+					return page1.getTitle().compareTo(page2.getTitle());
+				}
 				return page1.getCreated().getTime() <= page2.getCreated().getTime() ? -1 : 1;
 			}
 		});
+
+		for (int i = 0; i < posts.size() - 1; i++) {
+			posts.get(i).setNext(posts.get(i + 1));
+		}
+
+		for (int i = 1; i < posts.size(); i++) {
+			posts.get(i).setPrevious(posts.get(i - 1));
+		}
 
 		List<CatTag> tags = new ArrayList<>(tagsMap.values());
 		List<CatTag> cats = new ArrayList<>(categoriesMap.values());
@@ -82,16 +93,22 @@ public class PageUtils {
 
 		// Setting post created date
 		String sCreated = rawParams.get("created");
+		if (sCreated == null) {
+			sCreated = rawParams.get("date");
+		}
 		if (sCreated != null) {
 			page.setCreated(DateUtils.parse(sCreated, siteConfig.getPostWritingDataFormat()));
 		}
 
 		// Setting post updated date
 		String sUpdated = rawParams.get("updated");
+		if (sUpdated == null) {
+			sUpdated = rawParams.get("lastmod");
+		}
 		if (sUpdated != null) {
 			page.setUpdated(DateUtils.parse(sUpdated, siteConfig.getPostWritingDataFormat()));
 		} else {
-			page.setUpdated(page.getUpdated());
+			page.setUpdated(page.getCreated());
 		}
 
 		// Setting is draft

@@ -46,10 +46,9 @@ public class TemplateUtils {
 	}
 
 	public static String formatContent(VelocityEngine engine, VelocityContext context, String templateName) {
-		Template template = engine.getTemplate(templateName);
+		Template template = engine.getTemplate(templateName, "UTF-8");
 		StringWriter writer = new StringWriter();
 		template.merge(context, writer);
-
 		return writer.toString();
 	}
 

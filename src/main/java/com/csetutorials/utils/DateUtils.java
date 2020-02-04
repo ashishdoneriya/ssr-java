@@ -14,6 +14,7 @@ public class DateUtils {
 		try {
 			return sdf.parse(sDate.trim());
 		} catch (ParseException e) {
+			e.printStackTrace();
 			return null;
 		}
 

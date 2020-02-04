@@ -64,6 +64,7 @@ public class Main {
 		SiteUtils.generateAuthorsPages(siteConfig, authorsPosts);
 
 		FileUtils.copyDirRecursively(siteConfig.getStaticContentDir(), siteConfig.getGeneratedHtmlDir());
+
 	}
 
 	private static Collection<? extends String> otherLayouts(SiteConfig siteConfig) {

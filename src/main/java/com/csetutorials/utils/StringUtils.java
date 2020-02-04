@@ -1,9 +1,9 @@
 package com.csetutorials.utils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class StringUtils {
 
@@ -41,7 +41,7 @@ public class StringUtils {
 
 	public static Map<String, String> getRawParams(String content) {
 		int index1 = content.indexOf("---");
-		Map<String, String> map = new HashMap<>(1);
+		Map<String, String> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		if (index1 == -1) {
 			return map;
 		}
