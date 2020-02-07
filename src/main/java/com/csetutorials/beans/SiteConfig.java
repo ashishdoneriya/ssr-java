@@ -29,6 +29,7 @@ public class SiteConfig {
 	private String layoutsDir;
 	private String tempDir;
 	private String dataDir;
+	private String themesDir;
 	private String categoriesLayout;
 	private String tagsLayout;
 	private String latestPostsLayout;
@@ -36,10 +37,10 @@ public class SiteConfig {
 	private String categoryBase;
 	private String tagBase;
 	private String authorBase;
-	private boolean authorPaginationEnabled;
 	private String latestPostsBase;
 	private boolean paginationEnabled;
 	private int maxPosts;
+	private String theme;
 
 	private transient String root, tempLayoutsPath;
 	private transient Map<String, Object> rawConfig;
@@ -75,7 +76,7 @@ public class SiteConfig {
 		this.setIndexPostsBase("/");
 		this.setPaginationEnabled(true);
 		this.setMaxPosts(10);
-		this.authorPaginationEnabled = false;
+		this.themesDir = File.separator + "themes";
 		this.postWritingDataFormat = "yyyy-mm-dd HH:mm";
 	}
 
@@ -353,14 +354,6 @@ public class SiteConfig {
 		this.authorBase = authorBase;
 	}
 
-	public boolean isAuthorPaginationEnabled() {
-		return authorPaginationEnabled;
-	}
-
-	public void setAuthorPaginationEnabled(boolean authorPaginationEnabled) {
-		this.authorPaginationEnabled = authorPaginationEnabled;
-	}
-
 	public String getAuthorLayout() {
 		return authorLayout;
 	}
@@ -407,5 +400,13 @@ public class SiteConfig {
 
 	public void setData(Map<String, Object> data) {
 		this.data = data;
+	}
+
+	public String getTheme() {
+		return theme;
+	}
+
+	public void setTheme(String theme) {
+		this.theme = theme;
 	}
 }

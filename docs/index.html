@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en"
+	class="h-100">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport"
+		content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="description"
+		content="">
+	<meta name="author"
+		content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+	<meta name="generator"
+		content="Jekyll v3.8.6">
+	<title>SSJ - Static Site Generator in Java</title>
+
+	<link rel="canonical"
+		href="https://ashishdoneriya.github.io/ssj">
+
+	<link rel="stylesheet"
+		href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+		integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+		crossorigin="anonymous">
+
+
+	<meta name="theme-color"
+		content="#563d7c">
+
+
+	<style>
+		h2, h3 {
+			margin-top:30px;
+			margin-bottom:10px
+		}
+		.bd-placeholder-img {
+			font-size: 1.125rem;
+			text-anchor: middle;
+			-webkit-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+		}
+
+		@media (min-width: 768px) {
+			.bd-placeholder-img-lg {
+				font-size: 3.5rem;
+			}
+
+			p {
+				font-size: 1.2vmax;
+			}
+		}
+	</style>
+</head>
+
+<body class="d-flex flex-column h-100">
+	<header>
+		<!-- Fixed navbar -->
+		<nav class="navbar navbar-expand-md navbar-dark bg-dark">
+			<a class="navbar-brand"
+				href="#">SSJ</a>
+			<button class="navbar-toggler"
+				type="button"
+				data-toggle="collapse"
+				data-target="#navbarCollapse"
+				aria-controls="navbarCollapse"
+				aria-expanded="false"
+				aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse"
+				id="navbarCollapse">
+				<ul class="navbar-nav mr-auto">
+					<li class="nav-item active">
+						<a class="nav-link"
+							href="#">Home <span class="sr-only">(current)</span></a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link"
+							href="#">Link</a>
+					</li>
+				</ul>
+				<form class="form-inline mt-2 mt-md-0">
+					<input class="form-control mr-sm-2"
+						type="text"
+						placeholder="Search"
+						aria-label="Search">
+					<button class="btn btn-outline-success my-2 my-sm-0"
+						type="submit">Search</button>
+				</form>
+			</div>
+		</nav>
+	</header>
+
+	<!-- Begin page content -->
+	<main role="main"
+		class="flex-shrink-0">
+		<div class="container">
+			<h1 class="mt-5">Documentation</h1>
+		</div>
+		<div class="container">
+			<h2>How to create a theme </h2>
+
+			<h3>Fixed directory names</h3>
+			<table class="table table-bordered table-hover table-sm"
+				style="max-width: 600px;">
+				<thead class="thead-dark">
+					<tr>
+						<th>Directory Name</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tr>
+					<td>layouts</td>
+					<td>All the layouts (can be nested)</td>
+				</tr>
+				<tr>
+					<td>static</td>
+					<td>All content inside static directory will be copied in the build directory</td>
+				</tr>
+			</table>
+			<p>If the user defines some layout or content inside static directory and if the name collides with theme layout or static content, then in this case uses's layout or content will override the theme's layout or static content file</p>
+		</div>
+		<div class="container">
+			<h3>Fixed layout names</h3>
+			<table class="table table-bordered table-hover table-sm"
+				style="max-width: 600px;">
+				<thead class="thead-dark">
+					<tr>
+						<th>Template name</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tr>
+					<td>post.html</td>
+					<td>Main content of the blog</td>
+				</tr>
+				<tr>
+					<td>page.html</td>
+					<td>Page content of the blog</td>
+				</tr>
+				<tr>
+					<td>category.html</td>
+					<td>Individual Category page</td>
+				</tr>
+				<tr>
+					<td>tag.html</td>
+					<td>Individual Tag page</td>
+				</tr>
+				<tr>
+					<td>author.html</td>
+					<td>Individual Author page</td>
+				</tr>
+				<tr>
+					<td>latest-posts.html</td>
+					<td>Latest posts listing</td>
+				</tr>
+			</table>
+		</div>
+		<div class="container">
+			<h3>Blog Default Configuration</h3>
+			<table class="table table-bordered table-hover table-sm"
+				style="max-width: 600px;">
+				<thead class="thead-dark">
+					<tr>
+						<th>Description</th>
+						<th>Values</th>
+					</tr>
+				</thead>
+				<tr>
+					<td>Blog Title</td>
+					<td>My Site</td>
+				</tr>
+				<tr>
+					<td>Base Url</td>
+					<td>/</td>
+				</tr>
+				<tr>
+					<td>Posts Directory</td>
+					<td>posts</td>
+				</tr>
+				<tr>
+					<td>Pages Directory</td>
+					<td>pages</td>
+				</tr>
+				<tr>
+					<td>Generated Html Pages Directory</td>
+					<td>dist</td>
+				</tr>
+				<tr>
+					<td>Temporary Directory</td>
+					<td>temp</td>
+				</tr>
+				<tr>
+					<td>Static Content Directory</td>
+					<td>static</td>
+				</tr>
+				<tr>
+					<td>Data Directory</td>
+					<td>data</td>
+				</tr>
+				<tr>
+					<td>Themes Directory</td>
+					<td>themes</td>
+				</tr>
+				<tr>
+					<td>Categories Base</td>
+					<td>topics</td>
+				</tr>
+				<tr>
+					<td>Tag Base</td>
+					<td>tag</td>
+				</tr>
+				<tr>
+					<td>Author Base</td>
+					<td>author</td>
+				</tr>
+				<tr>
+					<td>Latest Posts Base</td>
+					<td>/</td>
+				</tr>
+				<tr>
+					<td>Post permalink</td>
+					<td>/:slug.html</td>
+				</tr>
+				<tr>
+					<td>Post Ugly Url Enabled</td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<td>Page permalink</td>
+					<td>/:slug</td>
+				</tr>
+				<tr>
+					<td>Page Ugly Url Enabled</td>
+					<td>false</td>
+				</tr>
+				<tr>
+					<td>Default Category</td>
+					<td>others</td>
+				</tr>
+				<tr>
+					<td>Latest Posts Base</td>
+					<td>/</td>
+				</tr>
+				<tr>
+					<td>Pagination Enabled</td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<td>Maximum Posts</td>
+					<td>10</td>
+				</tr>
+				<tr>
+					<td>Post Writing Date Format</td>
+					<td>yyyy-mm-dd HH:mm</td>
+				</tr>
+				<tr>
+					<td>Theme Name</td>
+					<td>Need to set manually</td>
+				</tr>
+			</table>
+		</div>
+	</main>
+
+</body>
+
+</html>
