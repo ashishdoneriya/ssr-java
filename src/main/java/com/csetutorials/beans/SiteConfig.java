@@ -30,17 +30,19 @@ public class SiteConfig {
 	private String tempDir;
 	private String dataDir;
 	private String themesDir;
-	private String categoriesLayout;
-	private String tagsLayout;
-	private String latestPostsLayout;
-	private String authorLayout;
 	private String categoryBase;
 	private String tagBase;
 	private String authorBase;
 	private String latestPostsBase;
 	private boolean paginationEnabled;
 	private int maxPosts;
-	private String theme;
+	private String activeTheme;
+
+	private transient String categoriesLayout;
+	private transient String tagsLayout;
+	private transient String latestPostsLayout;
+	private transient String authorLayout;
+	private transient String activeThemeDir;
 
 	private transient String root, tempLayoutsPath;
 	private transient Map<String, Object> rawConfig;
@@ -52,6 +54,7 @@ public class SiteConfig {
 	public SiteConfig() {
 		this.title = "My Site";
 		this.baseUrl = "/";
+		this.description = "This is a description";
 		this.postLayout = "post.html";
 		this.pageLayout = "page.html";
 		this.category = "others";
@@ -248,6 +251,7 @@ public class SiteConfig {
 		this.staticContentDir = StringUtils.removeExtraSlash(this.root + File.separator + this.staticContentDir);
 		this.tempLayoutsPath = StringUtils.removeExtraSlash(this.tempDir + File.separator + "layouts");
 		this.dataDir = StringUtils.removeExtraSlash(this.root + File.separator + this.dataDir);
+		this.themesDir = StringUtils.removeExtraSlash(this.root + File.separator + this.themesDir);
 	}
 
 	public String getTempLayoutsPath() {
@@ -402,12 +406,12 @@ public class SiteConfig {
 		this.data = data;
 	}
 
-	public String getTheme() {
-		return theme;
+	public String getActiveTheme() {
+		return activeTheme;
 	}
 
-	public void setTheme(String theme) {
-		this.theme = theme;
+	public void setActiveTheme(String theme) {
+		this.activeTheme = theme;
 	}
 
 	public String getThemesDir() {
@@ -416,5 +420,13 @@ public class SiteConfig {
 
 	public void setThemesDir(String themesDir) {
 		this.themesDir = themesDir;
+	}
+
+	public String getActiveThemeDir() {
+		return activeThemeDir;
+	}
+
+	public void setActiveThemeDir(String activeThemeDir) {
+		this.activeThemeDir = activeThemeDir;
 	}
 }

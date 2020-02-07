@@ -51,6 +51,9 @@ public class FileUtils {
 
 	public static List<File> getFilesRecursively(String dirPath) {
 		File dir = new File(dirPath);
+		if (!dir.exists() || dir.list().length == 0) {
+			return new ArrayList<>(1);
+		}
 		Stack<File> stack = new Stack<>();
 		List<File> list = new ArrayList<>();
 		stack.push(dir);
@@ -83,6 +86,9 @@ public class FileUtils {
 
 	public static void copyFile(File source, File dest) throws IOException {
 		dest.getParentFile().mkdirs();
+		if (dest.exists()) {
+			dest.delete();
+		}
 		try (InputStream is = new FileInputStream(source); OutputStream os = new FileOutputStream(dest)) {
 			byte[] buffer = new byte[1024];
 			int length;

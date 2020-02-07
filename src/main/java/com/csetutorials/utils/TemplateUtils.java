@@ -68,11 +68,22 @@ public class TemplateUtils {
 	 */
 
 	public static void createLayouts(SiteConfig siteConfig, Set<String> layouts) throws IOException {
-		List<File> layoutsList = FileUtils.getFilesRecursively(siteConfig.getLayoutsDir());
+		// Extracting themes layouts
+		List<File> layoutsList = FileUtils
+				.getFilesRecursively(siteConfig.getActiveThemeDir() + File.separator + "layouts");
 		for (File layoutFile : layoutsList) {
 			FileUtils.copyFile(layoutFile,
 					new File(siteConfig.getTempLayoutsPath() + File.separator + layoutFile.getName()));
 		}
+
+		// Extracting user defined layouts
+		layoutsList = FileUtils.getFilesRecursively(siteConfig.getLayoutsDir());
+		for (File layoutFile : layoutsList) {
+			FileUtils.copyFile(layoutFile,
+					new File(siteConfig.getTempLayoutsPath() + File.separator + layoutFile.getName()));
+		}
+
+		// Creating actual layouts
 		for (String templateFileName : layouts) {
 			if (!new File(siteConfig.getLayoutsDir() + File.separator + templateFileName).exists()) {
 				continue;

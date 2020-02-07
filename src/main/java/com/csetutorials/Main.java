@@ -63,8 +63,8 @@ public class Main {
 		SiteUtils.generateTagsPages(siteConfig, tagsPosts);
 		SiteUtils.generateAuthorsPages(siteConfig, authorsPosts);
 
+		FileUtils.copyDirRecursively(siteConfig.getActiveThemeDir() + "static", siteConfig.getGeneratedHtmlDir());
 		FileUtils.copyDirRecursively(siteConfig.getStaticContentDir(), siteConfig.getGeneratedHtmlDir());
-
 	}
 
 	private static Collection<? extends String> otherLayouts(SiteConfig siteConfig) {

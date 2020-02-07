@@ -36,7 +36,32 @@ public class SiteUtils {
 		SiteConfig config = Constants.gson.fromJson(json, SiteConfig.class);
 		config.setRawConfig(rawConfig);
 		config.setRoot(root);
+		config.setActiveThemeDir(getActiveThemeDir(config));
 		return config;
+	}
+
+	private static String getActiveThemeDir(SiteConfig config) {
+		String activeTheme = config.getActiveTheme();
+		if (activeTheme != null) {
+			File dir = new File(StringUtils.removeExtraSlash(config.getRoot() + File.separator + activeTheme));
+			if (dir.exists() && dir.isDirectory()) {
+				return dir.getAbsolutePath();
+			} else {
+				System.out.println("Invalid theme -" + activeTheme);
+				System.exit(1);
+			}
+		}
+		File dir = new File(config.getThemesDir());
+		if (!dir.exists() || !dir.isDirectory() || dir.list().length == 0) {
+			System.out.println("No theme found");
+			System.exit(1);
+		}
+		File[] themes = dir.listFiles();
+		if (themes.length > 1) {
+			System.out.println("Kindly set atleast one theme using field 'activeTheme'");
+			System.exit(1);
+		}
+		return themes[0].getAbsolutePath();
 	}
 
 	private static Map<String, Object> createMap(Page page) throws IOException {
