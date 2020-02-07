@@ -76,7 +76,7 @@ public class SiteConfig {
 		this.setIndexPostsBase("/");
 		this.setPaginationEnabled(true);
 		this.setMaxPosts(10);
-		this.themesDir = File.separator + "themes";
+		this.setThemesDir(File.separator + "themes");
 		this.postWritingDataFormat = "yyyy-mm-dd HH:mm";
 	}
 
@@ -408,5 +408,13 @@ public class SiteConfig {
 
 	public void setTheme(String theme) {
 		this.theme = theme;
+	}
+
+	public String getThemesDir() {
+		return themesDir;
+	}
+
+	public void setThemesDir(String themesDir) {
+		this.themesDir = themesDir;
 	}
 }
