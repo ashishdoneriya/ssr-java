@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,9 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.StringResourceLoader;
 import org.apache.velocity.runtime.resource.util.StringResourceRepository;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Ref;
 
 import com.csetutorials.beans.CatTag;
 import com.csetutorials.beans.Page;
@@ -43,13 +47,61 @@ public class SiteUtils {
 	private static String getActiveThemeDir(SiteConfig config) {
 		String activeTheme = config.getActiveTheme();
 		if (activeTheme != null) {
-			File dir = new File(StringUtils.removeExtraSlash(config.getRoot() + File.separator + activeTheme));
-			if (dir.exists() && dir.isDirectory()) {
-				return dir.getAbsolutePath();
+
+			if (activeTheme.startsWith("https://github.com")) {
+				String url = activeTheme;
+				if (url.endsWith("/")) {
+					url = url.substring(0, url.length() - 1);
+				}
+				String tree = "master";
+				String repo = url;
+				if (url.contains("tree")) {
+					repo = url.substring(0, url.indexOf("/tree"));
+					tree = url.substring(url.lastIndexOf("/") + 1);
+				}
+				String themeName = repo.substring(repo.lastIndexOf("/") + 1);
+				repo = repo + ".git";
+				File dir = new File(StringUtils.removeExtraSlash(config.getRoot() + File.separator + themeName));
+				if (dir.exists() && dir.isDirectory() && dir.list().length != 0) {
+					return dir.getAbsolutePath();
+				} else {
+					Collection<Ref> remoteRefs = null;
+					try {
+						remoteRefs = Git.lsRemoteRepository().setHeads(true).setTags(true).setRemote(repo).call();
+					} catch (GitAPIException e) {
+						System.out.println("Problem while fetching theme from [" + repo + "]");
+						e.printStackTrace();
+						System.exit(1);
+					}
+					Ref ref = null;
+					for (Ref temp : remoteRefs) {
+						String tempName = temp.getName();
+						tempName = tempName.substring(tempName.lastIndexOf("/") + 1);
+						if (tempName.equals(tree)) {
+							ref = temp;
+							break;
+						}
+					}
+					dir.getParentFile().mkdirs();
+
+					try (Git result = Git.cloneRepository().setURI(repo).setDirectory(dir).setBranch(ref.getName())
+							.call()) {
+
+					} catch (Exception e) {
+						System.out.println("Problem while cloning theme from [" + repo + "]");
+					}
+					return dir.getAbsolutePath();
+				}
 			} else {
-				System.out.println("Invalid theme -" + activeTheme);
-				System.exit(1);
+				File dir = new File(StringUtils.removeExtraSlash(config.getRoot() + File.separator + activeTheme));
+				if (dir.exists() && dir.isDirectory()) {
+					return dir.getAbsolutePath();
+				} else {
+					System.out.println("Invalid theme -" + activeTheme);
+					System.exit(1);
+				}
 			}
+
 		}
 		File dir = new File(config.getThemesDir());
 		if (!dir.exists() || !dir.isDirectory() || dir.list().length == 0) {
