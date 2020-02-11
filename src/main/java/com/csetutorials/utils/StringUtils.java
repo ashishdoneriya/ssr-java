@@ -92,10 +92,12 @@ public class StringUtils {
 
 	public static String toFirstCharUpperAll(String string) {
 		StringBuffer sb = new StringBuffer(string);
-		for (int i = 0; i < sb.length(); i++)
-			if (i == 0 || sb.charAt(i - 1) == '-')
+		for (int i = 0; i < sb.length(); i++) {
+			if (i == 0 || sb.charAt(i - 1) == '-') {
 				sb.setCharAt(i, Character.toUpperCase(sb.charAt(i)));
-		return sb.toString();
+			}
+		}
+		return sb.toString().replaceAll("-", " ");
 	}
 
 	public static Object parseToObject(String str) {

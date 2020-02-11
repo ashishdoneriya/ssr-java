@@ -160,7 +160,7 @@ public class PageUtils {
 		page.setPermalink(permalink);
 
 		// Setting url
-		page.setUrl(createUrl(siteConfig.getBaseUrl(), page.getPermalink()));
+		page.setUrl(createUrl(page.getPermalink()));
 
 		// Setting file obj
 		page.setFile(file);
@@ -180,7 +180,7 @@ public class PageUtils {
 			return null;
 		}
 		Map<String, Object> temp2 = (Map<String, Object>) temp1.get(author);
-		String url = siteConfig.getBaseUrl() + "/" + siteConfig.getAuthorBase() + "/" + author;
+		String url = siteConfig.getAuthorBase() + "/" + author;
 		url = StringUtils.removeExtraSlash(url);
 		temp2.put("url", url);
 		return temp2;
@@ -196,7 +196,7 @@ public class PageUtils {
 				CatTag tagObj = new CatTag();
 				tagObj.setShortcode(sTag);
 				tagObj.setName(StringUtils.toFirstCharUpperAll(sTag));
-				String url = siteConfig.getBaseUrl() + "/" + siteConfig.getTagBase() + "/" + sTag;
+				String url = siteConfig.getTagBase() + "/" + sTag;
 				tagObj.setUrl(url);
 				tags.add(tagObj);
 				tagsMap.put(sTag, tagObj);
@@ -220,8 +220,7 @@ public class PageUtils {
 				CatTag catObj = new CatTag();
 				catObj.setShortcode(sCat);
 				catObj.setName(StringUtils.toFirstCharUpperAll(sCat));
-				String url = StringUtils
-						.removeExtraSlash(siteConfig.getBaseUrl() + "/" + siteConfig.getCategoryBase() + "/" + sCat);
+				String url = StringUtils.removeExtraSlash(siteConfig.getCategoryBase() + "/" + sCat);
 				catObj.setUrl(url);
 				categories.add(catObj);
 				catsMap.put(sCat, catObj);
@@ -230,9 +229,11 @@ public class PageUtils {
 		return categories;
 	}
 
-	private static String createUrl(String baseUrl, String postPermalink) {
-		// TODO : Added more
-		return StringUtils.removeExtraSlash(baseUrl + postPermalink);
+	private static String createUrl(String postPermalink) {
+		if (postPermalink.startsWith("/")) {
+			postPermalink = postPermalink.substring(1);
+		}
+		return StringUtils.removeExtraSlash(postPermalink);
 
 	}
 
