@@ -27,13 +27,14 @@ import com.csetutorials.beans.CatTag;
 import com.csetutorials.beans.Page;
 import com.csetutorials.beans.Paginator;
 import com.csetutorials.beans.SiteConfig;
+import com.csetutorials.contants.Layouts;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 public class SiteUtils {
 
 	public static SiteConfig getSiteConfig(String root) throws JsonSyntaxException, IOException {
-		String json = FileUtils.getString(root + "/ssr.conf.json");
+		String json = FileUtils.getString(root + "/ssj.json");
 		Type type = new TypeToken<Map<String, Object>>() {
 		}.getType();
 		Map<String, Object> rawConfig = Constants.gson.fromJson(json, type);
@@ -45,7 +46,7 @@ public class SiteUtils {
 	}
 
 	private static String getActiveThemeDir(SiteConfig config) {
-		String activeTheme = config.getActiveTheme();
+		String activeTheme = config.getTheme();
 		if (activeTheme != null) {
 
 			if (activeTheme.startsWith("https://github.com")) {
@@ -61,7 +62,7 @@ public class SiteUtils {
 				}
 				String themeName = repo.substring(repo.lastIndexOf("/") + 1);
 				repo = repo + ".git";
-				File dir = new File(StringUtils.removeExtraSlash(config.getRoot() + File.separator + themeName));
+				File dir = new File(StringUtils.removeExtraSlash(config.getThemesDir() + File.separator + themeName));
 				if (dir.exists() && dir.isDirectory() && dir.list().length != 0) {
 					return dir.getAbsolutePath();
 				} else {
@@ -69,6 +70,7 @@ public class SiteUtils {
 					try {
 						remoteRefs = Git.lsRemoteRepository().setHeads(true).setTags(true).setRemote(repo).call();
 					} catch (GitAPIException e) {
+
 						System.out.println("Problem while fetching theme from [" + repo + "]");
 						e.printStackTrace();
 						System.exit(1);
@@ -93,7 +95,7 @@ public class SiteUtils {
 					return dir.getAbsolutePath();
 				}
 			} else {
-				File dir = new File(StringUtils.removeExtraSlash(config.getRoot() + File.separator + activeTheme));
+				File dir = new File(StringUtils.removeExtraSlash(config.getThemesDir() + File.separator + activeTheme));
 				if (dir.exists() && dir.isDirectory()) {
 					return dir.getAbsolutePath();
 				} else {
@@ -138,8 +140,7 @@ public class SiteUtils {
 	}
 
 	public static void generateLatestPostsPages(SiteConfig siteConfig) throws FileNotFoundException {
-		String layoutsDir = siteConfig.getLayoutsDir();
-		if (!new File(layoutsDir + File.separator + siteConfig.getLatestPostsLayout()).exists()) {
+		if (!TemplateUtils.isTemplateAvailable(siteConfig, Layouts.latestPosts)) {
 			return;
 		}
 
@@ -189,8 +190,7 @@ public class SiteUtils {
 
 	public static void generateCategoriesPages(SiteConfig siteConfig, Map<CatTag, List<Page>> catsWithRelatedPosts)
 			throws FileNotFoundException {
-		String layoutsDir = siteConfig.getLayoutsDir();
-		if (!new File(layoutsDir + File.separator + siteConfig.getCategoriesLayout()).exists()) {
+		if (!TemplateUtils.isTemplateAvailable(siteConfig, Layouts.category)) {
 			return;
 		}
 
@@ -247,8 +247,7 @@ public class SiteUtils {
 
 	public static void generateTagsPages(SiteConfig siteConfig, Map<CatTag, List<Page>> tagsWithRelatedPosts)
 			throws FileNotFoundException {
-		String layoutsDir = siteConfig.getLayoutsDir();
-		if (!new File(layoutsDir + File.separator + siteConfig.getTagsLayout()).exists()) {
+		if (!TemplateUtils.isTemplateAvailable(siteConfig, Layouts.tag)) {
 			return;
 		}
 
@@ -310,7 +309,6 @@ public class SiteUtils {
 	}
 
 	public static void generatePosts(List<Page> pages, SiteConfig siteConfig, boolean isPost) throws IOException {
-
 		VelocityContext context = new VelocityContext();
 		VelocityEngine engine = siteConfig.getEngine();
 		context.put("site", siteConfig.getRawConfig());
@@ -385,8 +383,7 @@ public class SiteUtils {
 
 	public static void generateAuthorsPages(SiteConfig siteConfig, Map<String, List<Page>> authorsPostsMap)
 			throws FileNotFoundException {
-		String layoutsDir = siteConfig.getLayoutsDir();
-		if (!new File(layoutsDir + File.separator + siteConfig.getAuthorLayout()).exists()) {
+		if (!TemplateUtils.isTemplateAvailable(siteConfig, Layouts.author)) {
 			return;
 		}
 

@@ -55,7 +55,7 @@ public class FileUtils {
 			return new ArrayList<>(1);
 		}
 		Stack<File> stack = new Stack<>();
-		List<File> list = new ArrayList<>();
+		List<File> list = new ArrayList<>(1);
 		stack.push(dir);
 		while (!stack.isEmpty()) {
 			File file = stack.pop();

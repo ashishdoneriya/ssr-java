@@ -3,9 +3,7 @@ package com.csetutorials.utils;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -18,10 +16,11 @@ import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 
 import com.csetutorials.beans.SiteConfig;
+import com.csetutorials.contants.DefaultDirs;
 
 public class TemplateUtils {
 
-	public static void setEngine(SiteConfig config) throws IOException {
+	public static void createEngine(SiteConfig config) throws IOException {
 		// Initialize the engine.
 		VelocityEngine engine = new VelocityEngine();
 		engine.setProperty(Velocity.RESOURCE_LOADER, "string");
@@ -31,6 +30,8 @@ public class TemplateUtils {
 		engine.init();
 		StringResourceRepository repo = (StringResourceRepository) engine
 				.getApplicationAttribute(StringResourceLoader.REPOSITORY_NAME_DEFAULT);
+
+		createLayouts(config);
 		for (File file : FileUtils.getFilesRecursively(config.getTempLayoutsPath())) {
 			repo.putStringResource(file.getName(), FileUtils.getString(file.getAbsolutePath()));
 		}
@@ -43,6 +44,10 @@ public class TemplateUtils {
 		StringResourceRepository repo = (StringResourceRepository) config.getEngine()
 				.getApplicationAttribute(StringResourceLoader.REPOSITORY_NAME_DEFAULT);
 		repo.putStringResource(templateName, templateContent);
+	}
+
+	public static boolean isTemplateAvailable(SiteConfig config, String templateName) {
+		return config.getEngine().resourceExists(templateName);
 	}
 
 	public static String formatContent(VelocityEngine engine, VelocityContext context, String templateName) {
@@ -67,33 +72,29 @@ public class TemplateUtils {
 	 * siteConfig.getTempLayoutsPath()); return engine; }
 	 */
 
-	public static void createLayouts(SiteConfig siteConfig, Set<String> layouts) throws IOException {
+	private static void createLayouts(SiteConfig siteConfig) throws IOException {
 		// Extracting themes layouts
-		List<File> layoutsList = FileUtils
-				.getFilesRecursively(siteConfig.getActiveThemeDir() + File.separator + "layouts");
-		for (File layoutFile : layoutsList) {
+		for (File layoutFile : FileUtils
+				.getFilesRecursively(siteConfig.getActiveThemeDir() + File.separator + DefaultDirs.layouts)) {
 			FileUtils.copyFile(layoutFile,
 					new File(siteConfig.getTempLayoutsPath() + File.separator + layoutFile.getName()));
 		}
 
-		// Extracting user defined layouts
-		layoutsList = FileUtils.getFilesRecursively(siteConfig.getLayoutsDir());
-		for (File layoutFile : layoutsList) {
+		for (File layoutFile : FileUtils
+				.getFilesRecursively(siteConfig.getRoot() + File.separator + DefaultDirs.layouts)) {
 			FileUtils.copyFile(layoutFile,
 					new File(siteConfig.getTempLayoutsPath() + File.separator + layoutFile.getName()));
 		}
 
 		// Creating actual layouts
-		for (String templateFileName : layouts) {
-			if (!new File(siteConfig.getLayoutsDir() + File.separator + templateFileName).exists()) {
-				continue;
-			}
-			String templateContent = generateTemplate(siteConfig.getLayoutsDir() + File.separator, templateFileName);
-			FileUtils.write(siteConfig.getTempLayoutsPath() + File.separator + templateFileName, templateContent);
+		for (File templateFile : FileUtils.getFilesRecursively(siteConfig.getTempLayoutsPath())) {
+			String templateContent = generateTemplate(siteConfig.getTempLayoutsPath(), templateFile.getName());
+			FileUtils.write(siteConfig.getTempLayoutsPath() + File.separator + templateFile.getName(), templateContent);
 		}
 	}
 
 	private static String generateTemplate(String layoutPath, String templateName) throws IOException {
+		layoutPath += File.separator;
 		String fileContent = FileUtils.getString(layoutPath + templateName);
 		while (true) {
 
@@ -102,7 +103,14 @@ public class TemplateUtils {
 				return fileContent;
 			}
 			templateName = params.get("layout");
-			String parentContent = FileUtils.getString(layoutPath + templateName);
+			String parentContent = null;
+			try {
+				parentContent = FileUtils.getString(layoutPath + templateName);
+			} catch (IOException e) {
+				System.out.println(e.getMessage());
+				return StringUtils.getContentBody(fileContent);
+			}
+
 			parentContent.replaceAll("\\$content", "REPLACE_ME_SSR");
 			fileContent = parentContent.replace("$content", StringUtils.getContentBody(fileContent));
 			fileContent.replace("REPLACE_ME_SSR", "\\$content");

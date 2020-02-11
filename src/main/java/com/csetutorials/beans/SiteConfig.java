@@ -23,10 +23,8 @@ public class SiteConfig {
 	private boolean pageUglyUrlEnabled;
 	private boolean postUglyUrlEnabled;
 	private String generatedHtmlDir;
-	private String staticContentDir;
 	private String postsDir;
 	private String pagesDir;
-	private String layoutsDir;
 	private String tempDir;
 	private String dataDir;
 	private String themesDir;
@@ -36,7 +34,7 @@ public class SiteConfig {
 	private String latestPostsBase;
 	private boolean paginationEnabled;
 	private int maxPosts;
-	private String activeTheme;
+	private String theme;
 
 	private transient String categoriesLayout;
 	private transient String tagsLayout;
@@ -65,9 +63,7 @@ public class SiteConfig {
 		this.generatedHtmlDir = File.separator + "dist";
 		this.postsDir = File.separator + "posts";
 		this.pagesDir = File.separator + "pages";
-		this.layoutsDir = File.separator + "layouts";
 		this.tempDir = File.separator + "temp";
-		this.staticContentDir = File.separator + "static";
 		this.dataDir = File.separator + "data";
 		this.setCategoriesLayout("category.html");
 		this.setTagsLayout("tag.html");
@@ -80,7 +76,7 @@ public class SiteConfig {
 		this.setPaginationEnabled(true);
 		this.setMaxPosts(10);
 		this.setThemesDir(File.separator + "themes");
-		this.postWritingDataFormat = "yyyy-mm-dd HH:mm";
+		this.postWritingDataFormat = "yyyy-MM-dd'T'HH:mm:ssXXX";
 	}
 
 	// Getter Methods
@@ -137,20 +133,12 @@ public class SiteConfig {
 		return generatedHtmlDir;
 	}
 
-	public String getStaticContentDir() {
-		return staticContentDir;
-	}
-
 	public String getPostsDir() {
 		return postsDir;
 	}
 
 	public String getPagesDir() {
 		return pagesDir;
-	}
-
-	public String getLayoutsDir() {
-		return layoutsDir;
 	}
 
 	public void setTitle(String title) {
@@ -205,20 +193,12 @@ public class SiteConfig {
 		this.generatedHtmlDir = generatedHtmlDir;
 	}
 
-	public void setStaticContentDir(String staticContentDir) {
-		this.staticContentDir = staticContentDir;
-	}
-
 	public void setPostsDir(String postsDir) {
 		this.postsDir = postsDir;
 	}
 
 	public void setPagesDir(String pagesDir) {
 		this.pagesDir = pagesDir;
-	}
-
-	public void setLayoutsDir(String layoutsDir) {
-		this.layoutsDir = layoutsDir;
 	}
 
 	public String getPagePermalink() {
@@ -245,10 +225,8 @@ public class SiteConfig {
 		this.root = StringUtils.removeExtraSlash(root);
 		this.postsDir = StringUtils.removeExtraSlash(this.root + File.separator + this.postsDir);
 		this.pagesDir = StringUtils.removeExtraSlash(this.root + File.separator + this.pagesDir);
-		this.layoutsDir = StringUtils.removeExtraSlash(this.root + File.separator + this.layoutsDir);
 		this.generatedHtmlDir = StringUtils.removeExtraSlash(this.root + File.separator + this.generatedHtmlDir);
 		this.tempDir = StringUtils.removeExtraSlash(this.root + File.separator + this.tempDir);
-		this.staticContentDir = StringUtils.removeExtraSlash(this.root + File.separator + this.staticContentDir);
 		this.tempLayoutsPath = StringUtils.removeExtraSlash(this.tempDir + File.separator + "layouts");
 		this.dataDir = StringUtils.removeExtraSlash(this.root + File.separator + this.dataDir);
 		this.themesDir = StringUtils.removeExtraSlash(this.root + File.separator + this.themesDir);
@@ -406,12 +384,12 @@ public class SiteConfig {
 		this.data = data;
 	}
 
-	public String getActiveTheme() {
-		return activeTheme;
+	public String getTheme() {
+		return theme;
 	}
 
-	public void setActiveTheme(String theme) {
-		this.activeTheme = theme;
+	public void setTheme(String theme) {
+		this.theme = theme;
 	}
 
 	public String getThemesDir() {
