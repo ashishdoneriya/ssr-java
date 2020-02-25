@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+import com.csetutorials.Main;
+
 public class FileUtils {
 
 	public static String getString(String path) throws IOException {
@@ -96,6 +98,10 @@ public class FileUtils {
 				os.write(buffer, 0, length);
 			}
 		}
+	}
+
+	public static String getResourceContent(String fileName) throws IOException {
+		return StringUtils.getString(Main.class.getResourceAsStream("/" + fileName));
 	}
 
 }

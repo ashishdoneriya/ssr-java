@@ -22,8 +22,13 @@ import org.apache.velocity.runtime.resource.util.StringResourceRepository;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Ref;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import com.csetutorials.beans.CatTag;
+import com.csetutorials.beans.Image;
 import com.csetutorials.beans.Page;
 import com.csetutorials.beans.Paginator;
 import com.csetutorials.beans.SiteConfig;
@@ -41,9 +46,6 @@ public class SiteUtils {
 		SiteConfig config = Constants.gson.fromJson(json, SiteConfig.class);
 		config.setRawConfig(rawConfig);
 		config.setRoot(root);
-		if (!config.getBaseUrl().endsWith("/")) {
-			config.setBaseUrl(config.getBaseUrl() + "/");
-		}
 		config.setActiveThemeDir(getActiveThemeDir(config));
 		return config;
 	}
@@ -173,16 +175,17 @@ public class SiteUtils {
 			paginator.setTotalPosts(posts.size());
 
 			if (i != totalPages) {
-				String nextPageUrl = siteConfig.getIndexPostsBase() + "/page/" + i;
+				String nextPageUrl = siteConfig.getBaseUrl() + "/" + siteConfig.getIndexPostsBase() + "/page/" + i;
 				nextPageUrl = StringUtils.removeExtraSlash(nextPageUrl);
 				paginator.setNextPageUrl(nextPageUrl);
 			} else if (i != 1) {
-				String previousPageUrl = siteConfig.getIndexPostsBase() + (i == 2 ? "" : "/page/" + i);
+				String previousPageUrl = siteConfig.getBaseUrl() + "/" + siteConfig.getIndexPostsBase()
+						+ (i == 2 ? "" : "/page/" + i);
 				previousPageUrl = StringUtils.removeExtraSlash(previousPageUrl);
 				paginator.setPreviousPageUrl(previousPageUrl);
 			}
-			String currentPageFilePath = siteConfig.getGeneratedHtmlDir() + File.separator
-					+ siteConfig.getIndexPostsBase() + File.separator
+			String currentPageFilePath = siteConfig.getGeneratedHtmlDir() + File.separator + siteConfig.getBaseUrl()
+					+ File.separator + siteConfig.getIndexPostsBase() + File.separator
 					+ (i == 1 ? "index.html" : "/page" + File.separator + i + File.separator + "index.html");
 			context.put("paginator", paginator);
 			String pageLayoutContent = TemplateUtils.formatContent(engine, context, siteConfig.getLatestPostsLayout());
@@ -224,17 +227,19 @@ public class SiteUtils {
 				paginator.setTotalPosts(catPosts.size());
 
 				if (i != totalPages) {
-					String nextPageUrl = siteConfig.getCategoryBase() + "/" + cat.getShortcode() + "/page/" + i;
+					String nextPageUrl = siteConfig.getBaseUrl() + "/" + siteConfig.getCategoryBase() + "/"
+							+ cat.getShortcode() + "/page/" + i;
 					nextPageUrl = StringUtils.removeExtraSlash(nextPageUrl);
 					paginator.setNextPageUrl(nextPageUrl);
 				} else if (i != 1) {
-					String previousPageUrl = siteConfig.getCategoryBase() + "/" + cat.getShortcode()
-							+ (i == 2 ? "" : "/page/" + i);
+					String previousPageUrl = siteConfig.getBaseUrl() + "/" + siteConfig.getCategoryBase() + "/"
+							+ cat.getShortcode() + (i == 2 ? "" : "/page/" + i);
 					previousPageUrl = StringUtils.removeExtraSlash(previousPageUrl);
 					paginator.setPreviousPageUrl(previousPageUrl);
 				}
-				String currentPageFilePath = siteConfig.getGeneratedHtmlDir() + File.separator
-						+ siteConfig.getCategoryBase() + File.separator + cat.getShortcode() + File.separator
+				String currentPageFilePath = siteConfig.getGeneratedHtmlDir() + File.separator + siteConfig.getBaseUrl()
+						+ File.separator + siteConfig.getCategoryBase() + File.separator + cat.getShortcode()
+						+ File.separator
 						+ (i == 1 ? "index.html" : "/page" + File.separator + i + File.separator + "index.html");
 				context.put("paginator", paginator);
 				context.put("category", cat);
@@ -278,17 +283,18 @@ public class SiteUtils {
 				paginator.setTotalPosts(tagPosts.size());
 
 				if (i != totalPages) {
-					String nextPageUrl = siteConfig.getTagBase() + "/" + tag.getName() + "/page/" + i;
+					String nextPageUrl = siteConfig.getBaseUrl() + "/" + siteConfig.getTagBase() + "/" + tag.getName()
+							+ "/page/" + i;
 					nextPageUrl = StringUtils.removeExtraSlash(nextPageUrl);
 					paginator.setNextPageUrl(nextPageUrl);
 				} else if (i != 1) {
-					String previousPageUrl = siteConfig.getTagBase() + "/" + tag.getName()
-							+ (i == 2 ? "" : "/page/" + i);
+					String previousPageUrl = siteConfig.getBaseUrl() + "/" + siteConfig.getTagBase() + "/"
+							+ tag.getName() + (i == 2 ? "" : "/page/" + i);
 					previousPageUrl = StringUtils.removeExtraSlash(previousPageUrl);
 					paginator.setPreviousPageUrl(previousPageUrl);
 				}
-				String currentPageFilePath = siteConfig.getGeneratedHtmlDir() + File.separator + siteConfig.getTagBase()
-						+ File.separator + tag.getName() + File.separator
+				String currentPageFilePath = siteConfig.getGeneratedHtmlDir() + File.separator + siteConfig.getBaseUrl()
+						+ File.separator + siteConfig.getTagBase() + File.separator + tag.getName() + File.separator
 						+ (i == 1 ? "index.html" : "/page" + File.separator + i + File.separator + "index.html");
 				context.put("paginator", paginator);
 				context.put("tag", tag);
@@ -327,6 +333,8 @@ public class SiteUtils {
 			}
 			TemplateUtils.addTemplate(siteConfig, "test-template-ssr", content);
 			content = TemplateUtils.formatContent(engine, context, "test-template-ssr");
+			List<Image> images = extractImages(siteConfig, content);
+			page.setImages(images);
 			map.put("content", content);
 			context.put("page", map);
 			String postLayoutContent = TemplateUtils.formatContent(engine, context, page.getLayout());
@@ -335,9 +343,40 @@ public class SiteUtils {
 		}
 	}
 
+	private static List<Image> extractImages(SiteConfig siteConfig, String content) {
+		Document doc = Jsoup.parse(content);
+		Elements imageElements = doc.select("img");
+		List<Image> images = new ArrayList<>(1);
+		for (Element imageEle : imageElements) {
+			String src = imageEle.attr("src");
+
+			if (!src.startsWith("http")) {
+				if (!src.startsWith("/") && !siteConfig.getBaseUrl().equals("/")) {
+					src = siteConfig.getBaseUrl() + src;
+				}
+				src = siteConfig.getUrl() + "/" + src;
+				src = StringUtils.removeExtraSlash(src);
+			}
+
+			String alt = imageEle.attr("alt");
+			if (StringUtils.isBlank(alt)) {
+				int slashLastIndex = src.lastIndexOf('/');
+				if (slashLastIndex != -1) {
+					alt = src.substring(slashLastIndex + 1);
+				}
+				alt = alt.split(".")[0].replaceAll("-", " ");
+			}
+			Image image = new Image();
+			image.setAlt(alt);
+			image.setSrc(src);
+			images.add(image);
+		}
+		return images;
+	}
+
 	public static void write(String permalink, String content, SiteConfig siteConfig, boolean uglyUrl)
 			throws FileNotFoundException {
-		permalink = permalink + (uglyUrl ? "" : "/index.html");
+		permalink = "/" + permalink + (uglyUrl ? "" : "/index.html");
 		String path = siteConfig.getGeneratedHtmlDir() + permalink;
 		path = path.replaceAll("/+", "/").replaceAll("/", File.separator);
 		File file = new File(path);
@@ -347,7 +386,7 @@ public class SiteUtils {
 
 	public static void writePost(String postPermalink, String postContent, SiteConfig siteConfig)
 			throws FileNotFoundException {
-		postPermalink = postPermalink + (siteConfig.isPostUglyUrlEnabled() ? "" : "/index.html");
+		postPermalink = "/" + postPermalink + (siteConfig.isPostUglyUrlEnabled() ? "" : "/index.html");
 		String path = siteConfig.getGeneratedHtmlDir() + postPermalink;
 		path = path.replaceAll("/+", "/").replaceAll("/", File.separator);
 		File file = new File(path);
@@ -412,17 +451,18 @@ public class SiteUtils {
 				paginator.setTotalPosts(authorPosts.size());
 
 				if (i != totalPages) {
-					String nextPageUrl = siteConfig.getAuthorBase() + "/" + authorName + "/page/" + i;
+					String nextPageUrl = siteConfig.getBaseUrl() + "/" + siteConfig.getAuthorBase() + "/" + authorName
+							+ "/page/" + i;
 					nextPageUrl = StringUtils.removeExtraSlash(nextPageUrl);
 					paginator.setNextPageUrl(nextPageUrl);
 				} else if (i != 1) {
-					String previousPageUrl = siteConfig.getAuthorBase() + "/" + authorName
-							+ (i == 2 ? "" : "/page/" + i);
+					String previousPageUrl = siteConfig.getBaseUrl() + "/" + siteConfig.getAuthorBase() + "/"
+							+ authorName + (i == 2 ? "" : "/page/" + i);
 					previousPageUrl = StringUtils.removeExtraSlash(previousPageUrl);
 					paginator.setPreviousPageUrl(previousPageUrl);
 				}
-				String currentPageFilePath = siteConfig.getGeneratedHtmlDir() + File.separator
-						+ siteConfig.getAuthorBase() + File.separator + authorName + File.separator
+				String currentPageFilePath = siteConfig.getGeneratedHtmlDir() + File.separator + siteConfig.getBaseUrl()
+						+ File.separator + siteConfig.getAuthorBase() + File.separator + authorName + File.separator
 						+ (i == 1 ? "index.html" : "/page" + File.separator + i + File.separator + "index.html");
 				context.put("paginator", paginator);
 				context.put("author", list.get(0).getAuthor());

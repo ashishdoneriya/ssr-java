@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="$xslPath"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+#foreach( $siteMap in $siteMaps )
+	<sitemap>
+		<loc>$siteMap.url</loc>
+#if ($siteMap.lastMod)
+		<lastmod>$siteMap.lastMod</lastmod>
+#end
+	</sitemap>
+#end
+</sitemapindex>

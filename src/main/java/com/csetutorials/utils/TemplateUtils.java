@@ -3,6 +3,8 @@ package com.csetutorials.utils;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.velocity.Template;
@@ -11,6 +13,8 @@ import org.apache.velocity.app.Velocity;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.resource.loader.StringResourceLoader;
 import org.apache.velocity.runtime.resource.util.StringResourceRepository;
+import org.commonmark.Extension;
+import org.commonmark.ext.gfm.tables.TablesExtension;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
@@ -35,6 +39,8 @@ public class TemplateUtils {
 		for (File file : FileUtils.getFilesRecursively(config.getTempLayoutsPath())) {
 			repo.putStringResource(file.getName(), FileUtils.getString(file.getAbsolutePath()));
 		}
+		repo.putStringResource("sitemap_index.xml", FileUtils.getResourceContent("sitemap_index.xml"));
+		repo.putStringResource("page-sitemap.xml", FileUtils.getResourceContent("page-sitemap.xml"));
 		config.setEngine(engine);
 	}
 
@@ -58,9 +64,10 @@ public class TemplateUtils {
 	}
 
 	public static String parseMarkdown(String content) {
-		Parser parser = Parser.builder().build();
+		List<Extension> extensions = Arrays.asList(TablesExtension.create());
+		Parser parser = Parser.builder().extensions(extensions).build();
 		Node document = parser.parse(content);
-		HtmlRenderer renderer = HtmlRenderer.builder().build();
+		HtmlRenderer renderer = HtmlRenderer.builder().extensions(extensions).build();
 		return renderer.render(document);
 	}
 

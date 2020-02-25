@@ -34,6 +34,12 @@ public class Page {
 
 	private Page next, previous;
 
+	private List<Image> images;
+
+	private String absoluteUrl;
+
+	private String lastMod;
+
 	public String getTitle() {
 		return title;
 	}
@@ -160,6 +166,30 @@ public class Page {
 
 	public void setPrevious(Page previous) {
 		this.previous = previous;
+	}
+
+	public List<Image> getImages() {
+		return images;
+	}
+
+	public void setImages(List<Image> images) {
+		this.images = images;
+	}
+
+	public String getAbsoluteUrl() {
+		return absoluteUrl;
+	}
+
+	public void setAbsoluteUrl(String absoluteUrl) {
+		this.absoluteUrl = absoluteUrl;
+	}
+
+	public String getLastMod() {
+		return lastMod;
+	}
+
+	public void setLastMod(String lastMod) {
+		this.lastMod = lastMod;
 	}
 
 }

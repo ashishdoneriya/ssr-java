@@ -1,6 +1,7 @@
 package com.csetutorials.utils;
 
 import java.io.File;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -33,7 +34,7 @@ public class PageUtils {
 				if (page1.getCreated() == null || page2.getCreated() == null) {
 					return page1.getTitle().compareTo(page2.getTitle());
 				}
-				return page1.getCreated().getTime() <= page2.getCreated().getTime() ? -1 : 1;
+				return page1.getCreated().getTime() >= page2.getCreated().getTime() ? -1 : 1;
 			}
 		});
 
@@ -97,7 +98,13 @@ public class PageUtils {
 			sCreated = rawParams.get("date");
 		}
 		if (sCreated != null) {
-			page.setCreated(DateUtils.parse(sCreated, siteConfig.getPostWritingDataFormat()));
+			try {
+				page.setCreated(DateUtils.parse(sCreated, siteConfig.getPostWritingDataFormat()));
+			} catch (ParseException e) {
+				System.out.println("In file :" + file.getAbsolutePath());
+				e.printStackTrace();
+				System.exit(1);
+			}
 		}
 
 		// Setting post updated date
@@ -106,10 +113,18 @@ public class PageUtils {
 			sUpdated = rawParams.get("lastmod");
 		}
 		if (sUpdated != null) {
-			page.setUpdated(DateUtils.parse(sUpdated, siteConfig.getPostWritingDataFormat()));
+			try {
+				page.setUpdated(DateUtils.parse(sUpdated, siteConfig.getPostWritingDataFormat()));
+			} catch (ParseException e) {
+				System.out.println("In file :" + file.getAbsolutePath());
+				e.printStackTrace();
+				System.exit(1);
+			}
 		} else {
 			page.setUpdated(page.getCreated());
 		}
+
+		page.setLastMod(DateUtils.getSiteMapString(page.getUpdated()));
 
 		// Setting is draft
 		String sIsDraft = rawParams.get("isDraft");
@@ -121,7 +136,6 @@ public class PageUtils {
 			// Setting categories
 			page.setCategories(
 					createCategories(categoriesMap, siteConfig, StringUtils.parseList(rawParams.get("categories"))));
-
 			page.setTags(createTags(tagsMap, siteConfig, StringUtils.parseList(rawParams.get("tags"))));
 		}
 
@@ -160,7 +174,13 @@ public class PageUtils {
 		page.setPermalink(permalink);
 
 		// Setting url
-		page.setUrl(createUrl(page.getPermalink()));
+<<<<<<< HEAD
+		page.setUrl(createUrl(siteConfig, page.getPermalink()));
+
+		page.setAbsoluteUrl(StringUtils.removeExtraSlash(siteConfig.getUrl() + "/" + page.getUrl()));
+=======
+		page.setUrl(createUrl(siteConfig.getBaseUrl(), page.getPermalink()));
+>>>>>>> parent of 3aed74e... Base url correction
 
 		// Setting file obj
 		page.setFile(file);
@@ -180,7 +200,7 @@ public class PageUtils {
 			return null;
 		}
 		Map<String, Object> temp2 = (Map<String, Object>) temp1.get(author);
-		String url = siteConfig.getAuthorBase() + "/" + author;
+		String url = siteConfig.getBaseUrl() + "/" + siteConfig.getAuthorBase() + "/" + author;
 		url = StringUtils.removeExtraSlash(url);
 		temp2.put("url", url);
 		return temp2;
@@ -196,7 +216,7 @@ public class PageUtils {
 				CatTag tagObj = new CatTag();
 				tagObj.setShortcode(sTag);
 				tagObj.setName(StringUtils.toFirstCharUpperAll(sTag));
-				String url = siteConfig.getTagBase() + "/" + sTag;
+				String url = siteConfig.getBaseUrl() + "/" + siteConfig.getTagBase() + "/" + sTag;
 				tagObj.setUrl(url);
 				tags.add(tagObj);
 				tagsMap.put(sTag, tagObj);
@@ -220,7 +240,8 @@ public class PageUtils {
 				CatTag catObj = new CatTag();
 				catObj.setShortcode(sCat);
 				catObj.setName(StringUtils.toFirstCharUpperAll(sCat));
-				String url = StringUtils.removeExtraSlash(siteConfig.getCategoryBase() + "/" + sCat);
+				String url = StringUtils
+						.removeExtraSlash(siteConfig.getBaseUrl() + "/" + siteConfig.getCategoryBase() + "/" + sCat);
 				catObj.setUrl(url);
 				categories.add(catObj);
 				catsMap.put(sCat, catObj);
@@ -229,12 +250,15 @@ public class PageUtils {
 		return categories;
 	}
 
-	private static String createUrl(String postPermalink) {
-		if (postPermalink.startsWith("/")) {
-			postPermalink = postPermalink.substring(1);
-		}
-		return StringUtils.removeExtraSlash(postPermalink);
+<<<<<<< HEAD
+	private static String createUrl(SiteConfig siteConfig, String postPermalink) {
+		return StringUtils.removeExtraSlash(siteConfig.getBaseUrl() + "/" + postPermalink);
+=======
+	private static String createUrl(String baseUrl, String postPermalink) {
+		// TODO : Added more
+		return StringUtils.removeExtraSlash(baseUrl + postPermalink);
 
+>>>>>>> parent of 3aed74e... Base url correction
 	}
 
 	private static String formatPermalink(Page page, String permalink) {

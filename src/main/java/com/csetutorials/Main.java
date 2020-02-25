@@ -13,11 +13,13 @@ import com.csetutorials.utils.DataUtils;
 import com.csetutorials.utils.FileUtils;
 import com.csetutorials.utils.PageUtils;
 import com.csetutorials.utils.SiteUtils;
+import com.csetutorials.utils.SitemapCreator;
 import com.csetutorials.utils.TemplateUtils;
 
 public class Main {
 
 	public static void main(String[] args) throws Exception {
+
 		if (args.length > 0 && args[0].contains("help")) {
 			System.out.println("--generate-config");
 			System.exit(0);
@@ -25,7 +27,7 @@ public class Main {
 		if (args.length > 0 && args[0].contains("generate-config")) {
 			generateSampleConfig();
 		}
-		String root = "/home/ashishdoneriya/projects/workbook-ssr-java";
+		String root = "/home/ashishdoneriya/projects/workbook-new";
 		if (args.length != 0) {
 			root = args[0];
 		}
@@ -54,7 +56,7 @@ public class Main {
 		SiteUtils.generateCategoriesPages(siteConfig, catsPosts);
 		SiteUtils.generateTagsPages(siteConfig, tagsPosts);
 		SiteUtils.generateAuthorsPages(siteConfig, authorsPosts);
-
+		SitemapCreator.createSiteMap(siteConfig, posts, pages);
 		FileUtils.copyDirRecursively(siteConfig.getActiveThemeDir() + File.separator + DefaultDirs.staticDir,
 				siteConfig.getGeneratedHtmlDir());
 		FileUtils.copyDirRecursively(siteConfig.getRoot() + File.separator + DefaultDirs.staticDir,

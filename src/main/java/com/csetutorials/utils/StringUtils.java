@@ -1,5 +1,9 @@
 package com.csetutorials.utils;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -87,17 +91,15 @@ public class StringUtils {
 		if (str.endsWith("/")) {
 			str = str.substring(0, str.length() - 1);
 		}
-		return str.replaceAll("/+", "/");
+		return str.replaceAll("/+", "/").replace("http:/", "http://").replace("https:/", "https://");
 	}
 
 	public static String toFirstCharUpperAll(String string) {
 		StringBuffer sb = new StringBuffer(string);
-		for (int i = 0; i < sb.length(); i++) {
-			if (i == 0 || sb.charAt(i - 1) == '-') {
+		for (int i = 0; i < sb.length(); i++)
+			if (i == 0 || sb.charAt(i - 1) == '-')
 				sb.setCharAt(i, Character.toUpperCase(sb.charAt(i)));
-			}
-		}
-		return sb.toString().replaceAll("-", " ");
+		return sb.toString();
 	}
 
 	public static Object parseToObject(String str) {
@@ -117,6 +119,21 @@ public class StringUtils {
 
 	public static boolean isBlank(String str) {
 		return str == null || str.trim().isEmpty();
+	}
+
+	public static String getString(InputStream inputStream) throws IOException {
+		if (inputStream == null) {
+			return "";
+		}
+		StringBuilder sb = new StringBuilder();
+		try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+			String line = bufferedReader.readLine();
+			while (line != null) {
+				sb.append(line).append("\n");
+				line = bufferedReader.readLine();
+			}
+			return sb.toString();
+		}
 	}
 
 }

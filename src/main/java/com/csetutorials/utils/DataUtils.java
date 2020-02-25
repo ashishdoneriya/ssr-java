@@ -16,10 +16,16 @@ public class DataUtils {
 		Map<String, Object> map = new HashMap<>();
 		if (!dir.exists() || dir.list().length == 0) {
 			siteConfig.setData(new HashMap<String, Object>(1));
+			return;
 		}
+
 		for (File file : dir.listFiles()) {
 			if (file.isFile()) {
-				map.put(file.getName(), getObject(file));
+				String name = file.getName();
+				if (name.endsWith(".json")) {
+					name = name.substring(0, name.indexOf(".json"));
+				}
+				map.put(name, getObject(file));
 			} else {
 				map.put(file.getName(), readDir(file));
 			}
@@ -52,7 +58,11 @@ public class DataUtils {
 		}
 		for (File file : dir.listFiles()) {
 			if (file.isFile()) {
-				map.put(file.getName(), getObject(file));
+				String name = file.getName();
+				if (name.endsWith(".json")) {
+					name = name.substring(0, name.indexOf(".json"));
+				}
+				map.put(name, getObject(file));
 			} else {
 				map.put(file.getName(), readDir(file));
 			}
