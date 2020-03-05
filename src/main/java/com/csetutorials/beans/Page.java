@@ -40,6 +40,10 @@ public class Page {
 
 	private String lastMod;
 
+	private String featuredImage;
+
+	private String featuredImageAbsoluteUrl;
+
 	public String getTitle() {
 		return title;
 	}
@@ -190,6 +194,22 @@ public class Page {
 
 	public void setLastMod(String lastMod) {
 		this.lastMod = lastMod;
+	}
+
+	public String getFeaturedImage() {
+		return featuredImage;
+	}
+
+	public void setFeaturedImage(String featuredImage) {
+		this.featuredImage = featuredImage;
+	}
+
+	public String getFeaturedImageAbsoluteUrl() {
+		return featuredImageAbsoluteUrl;
+	}
+
+	public void setFeaturedImageAbsoluteUrl(String featuredImageAbsoluteUrl) {
+		this.featuredImageAbsoluteUrl = featuredImageAbsoluteUrl;
 	}
 
 }

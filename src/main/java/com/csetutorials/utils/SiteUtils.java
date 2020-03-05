@@ -117,7 +117,7 @@ public class SiteUtils {
 		}
 		File[] themes = dir.listFiles();
 		if (themes.length > 1) {
-			System.out.println("Kindly set atleast one theme using field 'activeTheme'");
+			System.out.println("Kindly set atleast one theme using field 'theme'");
 			System.exit(1);
 		}
 		return themes[0].getAbsolutePath();

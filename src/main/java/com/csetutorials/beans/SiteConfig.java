@@ -11,8 +11,10 @@ import com.csetutorials.utils.StringUtils;
 public class SiteConfig {
 	private String title;
 	private String baseUrl;
+	private String tagline;
 	private String description;
 	private String url;
+	private String favicon;
 	private String postWritingDataFormat;
 	private String author;
 	private String postLayout;
@@ -35,6 +37,7 @@ public class SiteConfig {
 	private boolean paginationEnabled;
 	private int maxPosts;
 	private String theme;
+	private SeoSettings seoSettings;
 
 	private transient String categoriesLayout;
 	private transient String tagsLayout;
@@ -77,6 +80,10 @@ public class SiteConfig {
 		this.setMaxPosts(10);
 		this.setThemesDir(File.separator + "themes");
 		this.postWritingDataFormat = "yyyy-MM-dd'T'HH:mm:ssXXX";
+	}
+
+	public SiteConfig(boolean blank) {
+
 	}
 
 	// Getter Methods
@@ -406,5 +413,29 @@ public class SiteConfig {
 
 	public void setActiveThemeDir(String activeThemeDir) {
 		this.activeThemeDir = activeThemeDir;
+	}
+
+	public String getTagline() {
+		return tagline;
+	}
+
+	public void setTagline(String tagline) {
+		this.tagline = tagline;
+	}
+
+	public SeoSettings getSeoSettings() {
+		return seoSettings;
+	}
+
+	public void setSeoSettings(SeoSettings seoSettings) {
+		this.seoSettings = seoSettings;
+	}
+
+	public String getFavicon() {
+		return favicon;
+	}
+
+	public void setFavicon(String favicon) {
+		this.favicon = favicon;
 	}
 }

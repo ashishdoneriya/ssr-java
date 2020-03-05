@@ -160,7 +160,7 @@ public class PageUtils {
 		// Setting slug
 		String slug = rawParams.get("slug");
 		if (StringUtils.isBlank(slug)) {
-			slug = page.getTitle().toLowerCase().replaceAll(" ", "-");
+			slug = file.getName().substring(0, file.getName().lastIndexOf('.')).toLowerCase();
 
 		}
 		page.setSlug(slug);
@@ -174,13 +174,9 @@ public class PageUtils {
 		page.setPermalink(permalink);
 
 		// Setting url
-<<<<<<< HEAD
 		page.setUrl(createUrl(siteConfig, page.getPermalink()));
 
 		page.setAbsoluteUrl(StringUtils.removeExtraSlash(siteConfig.getUrl() + "/" + page.getUrl()));
-=======
-		page.setUrl(createUrl(siteConfig.getBaseUrl(), page.getPermalink()));
->>>>>>> parent of 3aed74e... Base url correction
 
 		// Setting file obj
 		page.setFile(file);
@@ -239,7 +235,7 @@ public class PageUtils {
 			} else {
 				CatTag catObj = new CatTag();
 				catObj.setShortcode(sCat);
-				catObj.setName(StringUtils.toFirstCharUpperAll(sCat));
+				catObj.setName(StringUtils.toFirstCharUpperAll(sCat).replaceAll("-", " "));
 				String url = StringUtils
 						.removeExtraSlash(siteConfig.getBaseUrl() + "/" + siteConfig.getCategoryBase() + "/" + sCat);
 				catObj.setUrl(url);
@@ -250,15 +246,8 @@ public class PageUtils {
 		return categories;
 	}
 
-<<<<<<< HEAD
 	private static String createUrl(SiteConfig siteConfig, String postPermalink) {
 		return StringUtils.removeExtraSlash(siteConfig.getBaseUrl() + "/" + postPermalink);
-=======
-	private static String createUrl(String baseUrl, String postPermalink) {
-		// TODO : Added more
-		return StringUtils.removeExtraSlash(baseUrl + postPermalink);
-
->>>>>>> parent of 3aed74e... Base url correction
 	}
 
 	private static String formatPermalink(Page page, String permalink) {
