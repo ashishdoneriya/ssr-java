@@ -1,7 +1,12 @@
 <!-- Title -->
 <title>$page.title</title>
 <link rel="canonical" href="$page.title" />
+
+#if( $page.summary )
 <meta name="description" content="$page.summary" />
+<meta property="og:description" content="$page.summary" />
+<meta name="twitter:description" content="$page.summary" />
+#end
 
 <meta name="author" content="$page.author.name">
 <meta name="robots" content="index, follow">
@@ -11,8 +16,7 @@
 <meta property="og:url" content="$page.absoluteUrl" />
 <meta property="og:locale" content="en_US" />
 <meta property="og:site_name" content="$site.title" />
-<meta property="og:description" content="$page.summary …" />
-<meta property="og:updated_time" content="$DateUtils.getSiteMapString($page.updated)" />
+<meta property="og:updated_time" content="$dateUtils.getSiteMapString($page.updated)" />
 #if( $page.featuredImageAbsoluteUrl )
 <meta name="og:image" content="$page.featuredImageAbsoluteUrl" />
 <meta property="og:image:secure_url" content="$page.featuredImageAbsoluteUrl" />
@@ -22,12 +26,14 @@
 #end
 #if ($page.author.facebookUsername)
 <meta property="article:author" content="https://www.facebook.com/$page.author.facebookUsername" />
-#elseif ($site.seoSettings.facebookUsername)
+#elseif ($site.seoSettings && $site.seoSettings.facebookUsername)
 <meta property="article:author" content="https://www.facebook.com/$site.seoSettings.facebookUsername" />
 #end
-<meta property="article:modified_time" content="$DateUtils.getSiteMapString($page.updated)" />
-<meta property="article:published_time" content="$DateUtils.getSiteMapString($page.created)" />
+<meta property="article:modified_time" content="$dateUtils.getSiteMapString($page.updated)" />
+<meta property="article:published_time" content="$dateUtils.getSiteMapString($page.created)" />
+#if ($site.seoSettings && $site.seoSettings.facebookUsername)
 <meta property="article:publisher" content="https://www.facebook.com/$site.seoSettings.facebookUsername" />
+#end
 #if ($page.categories)
 #foreach( $category in $page.categories )
 <meta property="article:section" content="$category.name" />
@@ -40,11 +46,11 @@
 #end
 
 <meta name="twitter:title" content="$page.title" />
-<meta name="twitter:description" content="$page.summary […]" />
+
 <meta name="twitter:card" content="summary" />
 #if( $page.author.twitterUsername )
 <meta name="twitter:creator" content="@$page.author.twitterUsername" />
-#elseif ($site.seoSettings.twitterUsername)
+#elseif ($site.seoSettings && $site.seoSettings.twitterUsername)
 <meta name="twitter:creator" content="@$site.seoSettings.twitterUsername" />
 #end
 #if( $page.featuredImageAbsoluteUrl )
@@ -52,4 +58,6 @@
 #elseif( $page.images and $page.images.size() > 0 )
 <meta name="twitter:image" content="$page.images.get(0)" />
 #end
+#if ($site.seoSettings && $site.seoSettings.twitterUsername)
 <meta name="twitter:site" content="@$site.seoSettings.twitterUsername" />
+#end

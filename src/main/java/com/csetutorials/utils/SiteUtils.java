@@ -320,7 +320,8 @@ public class SiteUtils {
 		context.put("contentType", isPost ? "post" : "page");
 		context.put("data", siteConfig.getData());
 		context.put("dateUtils", new DateUtils());
-
+		final String metaTagsFormat = isPost ? FileUtils.getResourceContent("post-meta-tags.html") : "";
+		TemplateUtils.addTemplate(siteConfig, "ssj-meta-tags", metaTagsFormat);
 		for (Page page : pages) {
 			if (page.getIsDraft()) {
 				continue;
@@ -335,8 +336,11 @@ public class SiteUtils {
 			content = TemplateUtils.formatContent(engine, context, "test-template-ssr");
 			List<Image> images = extractImages(siteConfig, content);
 			page.setImages(images);
+
 			map.put("content", content);
 			context.put("page", map);
+			final String metaTags = TemplateUtils.formatContent(engine, context, "ssj-meta-tags");
+			context.put("seoSettings", metaTags);
 			String postLayoutContent = TemplateUtils.formatContent(engine, context, page.getLayout());
 			write(page.getPermalink(), postLayoutContent, siteConfig,
 					isPost ? siteConfig.isPostUglyUrlEnabled() : siteConfig.isPageUglyUrlEnabled());

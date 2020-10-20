@@ -160,11 +160,16 @@ public class PageUtils {
 		// Setting slug
 		String slug = rawParams.get("slug");
 		if (StringUtils.isBlank(slug)) {
-			slug = file.getName().substring(0, file.getName().lastIndexOf('.')).toLowerCase();
-
+			slug = file.getName();
+			if (slug.contains(".")) {
+				slug = slug.substring(0, file.getName().lastIndexOf('.'));
+			}
+			if (slug.contains(" ")) {
+				slug = slug.replaceAll(" ", "-");
+			}
+			slug = slug.toLowerCase();
 		}
 		page.setSlug(slug);
-
 		// Setting permalink
 		String permalink = rawParams.get("permalink");
 		if (StringUtils.isBlank(permalink)) {
