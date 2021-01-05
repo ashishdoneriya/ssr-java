@@ -15,6 +15,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import com.csetutorials.beans.Author;
 import com.csetutorials.beans.CatTag;
 import com.csetutorials.beans.OrganizationInfo;
 import com.csetutorials.beans.Page;
@@ -25,6 +26,7 @@ import com.csetutorials.contants.DefaultDirs;
 import com.csetutorials.utils.Constants;
 import com.csetutorials.utils.DataUtils;
 import com.csetutorials.utils.FileUtils;
+import com.csetutorials.utils.JsonSchemaUtils;
 import com.csetutorials.utils.PageUtils;
 import com.csetutorials.utils.SiteUtils;
 import com.csetutorials.utils.SitemapCreator;
@@ -42,6 +44,7 @@ public class Main {
 		SiteConfig siteConfig = SiteUtils.getSiteConfig(root);
 
 		DataUtils.readData(siteConfig);
+		DataUtils.loadAllAuthors(siteConfig);
 
 		List<Page> posts = PageUtils.createPostsMetaData(siteConfig);
 		List<Page> pages = PageUtils.createPagesMetaData(siteConfig);
@@ -55,9 +58,9 @@ public class Main {
 		siteConfig.getRawConfig().put("categories", PageUtils.extractCategories(posts, siteConfig));
 		siteConfig.getRawConfig().put("tagPosts", tagsPosts);
 		siteConfig.getRawConfig().put("categoriesPosts", catsPosts);
-
-		SiteUtils.generatePosts(posts, siteConfig, true);
-		SiteUtils.generatePosts(pages, siteConfig, false);
+		JsonSchemaUtils jsonSchemaUtils = new JsonSchemaUtils(siteConfig);
+		SiteUtils.generatePosts(posts, siteConfig, true, jsonSchemaUtils);
+		SiteUtils.generatePosts(pages, siteConfig, false, jsonSchemaUtils);
 
 		SiteUtils.generateLatestPostsPages(siteConfig);
 		SiteUtils.generateCategoriesPages(siteConfig, catsPosts);
@@ -151,13 +154,13 @@ public class Main {
 				String personImage = kb.nextLine().trim();
 				System.out.println("Person social profiles");
 				SocialMediaLinks personSocialLinks = askSocialMediaLinks(kb);
-				Map<String, Object> map = new HashMap<>();
-				map.put("name", personName);
-				map.put("username", username);
-				map.put("description", personDescription);
-				map.put("socialMediaLinks", personSocialLinks);
-				map.put("personImage", personImage);
-				createAuthor(websiteDirPath, username, map);
+				Author author = new Author();
+				author.setName(personName);
+				author.setUsername(username);
+				author.setDescription(personDescription);
+				author.setSocialMediaLinks(personSocialLinks);
+				author.setImageUrl(personImage);
+				createAuthor(websiteDirPath, username, author);
 			}
 			seoSettings.setOrganizationInfo(org);
 		} else {
@@ -176,24 +179,23 @@ public class Main {
 			String personImage = kb.nextLine().trim();
 			System.out.println("Your social profiles");
 			SocialMediaLinks social = askSocialMediaLinks(kb);
-			Map<String, Object> map = new HashMap<>();
-			map.put("name", personName);
-			map.put("username", username);
-			map.put("description", personDescription);
-			map.put("socialMediaLinks", social);
-			map.put("personImage", personImage);
-			createAuthor(websiteDirPath, username, map);
+			Author author = new Author();
+			author.setName(personName);
+			author.setUsername(username);
+			author.setDescription(personDescription);
+			author.setSocialMediaLinks(social);
+			author.setImageUrl(personImage);
+			createAuthor(websiteDirPath, username, author);
 			seoSettings.setPersonUsername(username);
-			config.setAuthor(username);
 		}
 		config.setSeoSettings(seoSettings);
 		kb.close();
 		FileUtils.write(websiteDirPath + File.separator + "ssj.json", Constants.prettyGson.toJson(config));
 	}
 
-	private static void createAuthor(String websiteDirPath, String username, Map<String, Object> map)
+	private static void createAuthor(String websiteDirPath, String username, Author author)
 			throws FileNotFoundException {
-		String json = Constants.prettyGson.toJson(map);
+		String json = Constants.prettyGson.toJson(author);
 		String path = websiteDirPath + File.separator + "data" + File.separator + "authors" + File.separator + username
 				+ ".json";
 		FileUtils.write(path, json);
@@ -202,9 +204,9 @@ public class Main {
 	private static SocialMediaLinks askSocialMediaLinks(Scanner kb) {
 		SocialMediaLinks social = new SocialMediaLinks();
 		System.out.print("Facebook Url : ");
-		social.setFacebook(kb.nextLine().trim());
+		social.setFacebookUrl(kb.nextLine().trim());
 		System.out.print("Twitter Url : ");
-		social.setTwitter(kb.nextLine().trim());
+		social.setTwitterUrl(kb.nextLine().trim());
 		System.out.print("Instagram Url : ");
 		social.setInstagram(kb.nextLine().trim());
 		System.out.print("LinkedIn Url : ");

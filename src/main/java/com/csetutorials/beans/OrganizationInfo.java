@@ -9,6 +9,8 @@ public class OrganizationInfo {
 	private SocialMediaLinks socialMediaLinks;
 
 	private String customJsonLdSchema;
+	
+	private String defaultAuthorUsername;
 
 	public String getName() {
 		return name;
@@ -40,6 +42,14 @@ public class OrganizationInfo {
 
 	public void setCustomJsonLdSchema(String customJsonLdSchema) {
 		this.customJsonLdSchema = customJsonLdSchema;
+	}
+
+	public String getDefaultAuthorUsername() {
+		return defaultAuthorUsername;
+	}
+
+	public void setDefaultAuthorUsername(String defaultAuthorUsername) {
+		this.defaultAuthorUsername = defaultAuthorUsername;
 	}
 
 }

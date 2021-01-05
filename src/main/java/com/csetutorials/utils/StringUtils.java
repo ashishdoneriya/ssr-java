@@ -120,6 +120,10 @@ public class StringUtils {
 	public static boolean isBlank(String str) {
 		return str == null || str.trim().isEmpty();
 	}
+	
+	public static boolean isNotBlank(String str) {
+		return !isBlank(str);
+	}
 
 	public static String getString(InputStream inputStream) throws IOException {
 		if (inputStream == null) {

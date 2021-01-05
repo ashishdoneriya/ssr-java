@@ -5,21 +5,21 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.csetutorials.beans.Author;
 import com.csetutorials.beans.SiteConfig;
 import com.google.gson.JsonSyntaxException;
 
 public class DataUtils {
 
 	public static void readData(SiteConfig siteConfig) throws JsonSyntaxException, IOException {
-		String dataDir = siteConfig.getDataDir();
-		File dir = new File(dataDir);
+		File dataDir = new File(siteConfig.getDataDir());
 		Map<String, Object> map = new HashMap<>();
-		if (!dir.exists() || dir.list().length == 0) {
+		if (!dataDir.exists() || dataDir.list().length == 0) {
 			siteConfig.setData(new HashMap<String, Object>(1));
 			return;
 		}
 
-		for (File file : dir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.isFile()) {
 				String name = file.getName();
 				if (name.endsWith(".json")) {
@@ -68,6 +68,21 @@ public class DataUtils {
 			}
 		}
 		return map;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static void loadAllAuthors(SiteConfig siteConfig) {
+		Map<String, Object> map = siteConfig.getData();
+		Map<String, Author> authors = (Map<String, Author>) map.get("authors");
+
+		siteConfig.setAuthors(authors);
+
+		if (siteConfig.getSeoSettings().getIsPerson()) {
+			siteConfig.setPublisherSocialLinks(
+					authors.get(siteConfig.getSeoSettings().getPersonUsername()).getSocialMediaLinks());
+		} else {
+			siteConfig.setPublisherSocialLinks(siteConfig.getSeoSettings().getOrganizationInfo().getSocialMediaLinks());
+		}
 	}
 
 }

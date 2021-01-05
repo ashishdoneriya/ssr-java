@@ -313,14 +313,14 @@ public class SiteUtils {
 		return sub;
 	}
 
-	public static void generatePosts(List<Page> pages, SiteConfig siteConfig, boolean isPost) throws IOException {
+	public static void generatePosts(List<Page> pages, SiteConfig siteConfig, boolean isPost, JsonSchemaUtils jsonSchemaUtils) throws IOException {
 		VelocityContext context = new VelocityContext();
 		VelocityEngine engine = siteConfig.getEngine();
 		context.put("site", siteConfig.getRawConfig());
 		context.put("contentType", isPost ? "post" : "page");
 		context.put("data", siteConfig.getData());
 		context.put("dateUtils", new DateUtils());
-		final String metaTagsFormat = isPost ? FileUtils.getResourceContent("post-meta-tags.html") : "";
+		final String metaTagsFormat = FileUtils.getResourceContent("post-meta-tags.html");
 		TemplateUtils.addTemplate(siteConfig, "ssj-meta-tags", metaTagsFormat);
 		for (Page page : pages) {
 			if (page.getIsDraft()) {
@@ -339,6 +339,7 @@ public class SiteUtils {
 
 			map.put("content", content);
 			context.put("page", map);
+			context.put("jsonSchema", jsonSchemaUtils.generatePageSchema(page));
 			final String metaTags = TemplateUtils.formatContent(engine, context, "ssj-meta-tags");
 			context.put("seoSettings", metaTags);
 			String postLayoutContent = TemplateUtils.formatContent(engine, context, page.getLayout());

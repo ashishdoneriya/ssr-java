@@ -31,5 +31,9 @@ public class SeoSettings {
 	public void setPersonUsername(String personUsername) {
 		this.personUsername = personUsername;
 	}
+	
+	public String getDefaultAuthor() {
+		return isPerson ? personUsername : organizationInfo.getDefaultAuthorUsername();
+	}
 
 }

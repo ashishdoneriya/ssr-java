@@ -142,7 +142,7 @@ public class PageUtils {
 		// Setting author info
 		String author = rawParams.get("author");
 		if (StringUtils.isBlank(author)) {
-			author = siteConfig.getAuthor();
+			author = siteConfig.getDefaultAuthor();
 		}
 		page.setAuthor(createAuthor(authorsMap, siteConfig, author));
 
@@ -194,14 +194,14 @@ public class PageUtils {
 
 	@SuppressWarnings("unchecked")
 	private static Map<String, Object> createAuthor(Map<String, Map<String, Object>> authorsMap, SiteConfig siteConfig,
-			String author) {
+			String authorUsername) {
 
 		Map<String, Object> temp1 = (Map<String, Object>) siteConfig.getData().get("authors");
 		if (temp1 == null) {
 			return null;
 		}
-		Map<String, Object> temp2 = (Map<String, Object>) temp1.get(author);
-		String url = siteConfig.getBaseUrl() + "/" + siteConfig.getAuthorBase() + "/" + author;
+		Map<String, Object> temp2 = (Map<String, Object>) temp1.get(authorUsername);
+		String url = siteConfig.getBaseUrl() + "/" + siteConfig.getAuthorBase() + "/" + authorUsername;
 		url = StringUtils.removeExtraSlash(url);
 		temp2.put("url", url);
 		return temp2;

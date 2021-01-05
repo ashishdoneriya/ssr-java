@@ -16,7 +16,6 @@ public class SiteConfig {
 	private String url;
 	private String favicon;
 	private String postWritingDataFormat;
-	private String author;
 	private String postLayout;
 	private String pageLayout;
 	private String category;
@@ -51,6 +50,9 @@ public class SiteConfig {
 	private List<Page> posts, pages;
 	private List<CatTag> categories, tags;
 	private Map<String, Object> data;
+	private transient Map<String, Author> authors;
+	
+	private SocialMediaLinks publisherSocialLinks;
 
 	public SiteConfig() {
 		this.title = "My Site";
@@ -108,8 +110,8 @@ public class SiteConfig {
 		return postWritingDataFormat;
 	}
 
-	public String getAuthor() {
-		return author;
+	public String getDefaultAuthor() {
+		return this.seoSettings.getDefaultAuthor();
 	}
 
 	public String getPostLayout() {
@@ -166,10 +168,6 @@ public class SiteConfig {
 
 	public void setPostWritingDataFormat(String postWritingDataFormat) {
 		this.postWritingDataFormat = postWritingDataFormat;
-	}
-
-	public void setAuthor(String author) {
-		this.author = author;
 	}
 
 	public void setPostLayout(String postLayout) {
@@ -437,5 +435,21 @@ public class SiteConfig {
 
 	public void setFavicon(String favicon) {
 		this.favicon = favicon;
+	}
+
+	public Map<String, Author> getAuthors() {
+		return authors;
+	}
+
+	public void setAuthors(Map<String, Author> authors) {
+		this.authors = authors;
+	}
+
+	public SocialMediaLinks getPublisherSocialLinks() {
+		return publisherSocialLinks;
+	}
+
+	public void setPublisherSocialLinks(SocialMediaLinks publisherSocialLinks) {
+		this.publisherSocialLinks = publisherSocialLinks;
 	}
 }
