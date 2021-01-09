@@ -1,6 +1,6 @@
 <!-- Title -->
 <title>$page.title</title>
-<link rel="canonical" href="$page.title" />
+<link rel="canonical" href="$page.absoluteUrl" />
 
 #if( $page.summary )
 <meta name="description" content="$page.summary" />
@@ -21,16 +21,16 @@
 #if( $page.updated )
 <meta property="og:updated_time" content="$dateUtils.getSiteMapString($page.updated)" />
 #end
-#if( $page.featuredImageAbsoluteUrl )
+#if( $StringUtils.isNotBlank($page.featuredImageAbsoluteUrl) )
 <meta name="og:image" content="$page.featuredImageAbsoluteUrl" />
 <meta property="og:image:secure_url" content="$page.featuredImageAbsoluteUrl" />
 #elseif( $page.images and $page.images.size() > 0 )
 <meta name="og:image" content="$page.images.get(0)" />
 <meta property="og:image:secure_url" content="$page.images.get(0)" />
 #end
-#if ($page.author.socialMediaLinks && $page.author.socialMediaLinks.facebookUrl)
+#if ($page.author.socialMediaLinks && $StringUtils.isNotBlank($page.author.socialMediaLinks.facebookUrl))
 <meta property="article:author" content="$page.author.socialMediaLinks.facebookUrl" />
-#elseif ($site.publisherSocialLinks && $site.publisherSocialLinks.facebookUrl)
+#elseif ($site.publisherSocialLinks && $StringUtils.isNotBlank($site.publisherSocialLinks.facebookUrl))
 <meta property="article:author" content="$site.publisherSocialLinks.facebookUrl" />
 #end
 #if( $page.updated )
@@ -39,7 +39,7 @@
 #if( $page.created )
 <meta property="article:published_time" content="$dateUtils.getSiteMapString($page.created)" />
 #end
-#if ($site.publisherSocialLinks && $site.publisherSocialLinks.facebookUrl)
+#if ($site.publisherSocialLinks && $StringUtils.isNotBlank($site.publisherSocialLinks.facebookUrl))
 <meta property="article:publisher" content="$site.publisherSocialLinks.facebookUrl />
 #end
 #if ($page.categories)
@@ -56,18 +56,18 @@
 <meta name="twitter:title" content="$page.title" />
 
 <meta name="twitter:card" content="summary" />
-#if( $page.author.socialMediaLinks && $page.author.socialMediaLinks.getTwitterUserName() )
-<meta name="twitter:creator" content="@$page.author.socialMediaLinks.getTwitterUserName()" />
-#elseif ($site.publisherSocialLinks && $site.publisherSocialLinks.getTwitterUserName())
-<meta name="twitter:creator" content="@$site.publisherSocialLinks.getTwitterUserName()" />
+#if( $page.author.socialMediaLinks && $page.author.socialMediaLinks.twitterUsername )
+<meta name="twitter:creator" content="@$page.author.socialMediaLinks.twitterUsername" />
+#elseif ($site.publisherSocialLinks && $site.publisherSocialLinks.twitterUsername)
+<meta name="twitter:creator" content="@$site.publisherSocialLinks.twitterUsername" />
 #end
-#if( $page.featuredImageAbsoluteUrl )
+#if( $StringUtils.isNotBlank($page.featuredImageAbsoluteUrl) )
 <meta name="twitter:image" content="$page.featuredImageAbsoluteUrl" />
 #elseif( $page.images and $page.images.size() > 0 )
 <meta name="twitter:image" content="$page.images.get(0)" />
 #end
-#if ($site.publisherSocialLinks && $site.publisherSocialLinks.getTwitterUserName())
-<meta name="twitter:site" content="@$site.publisherSocialLinks.getTwitterUserName()" />
+#if ($site.publisherSocialLinks && $site.publisherSocialLinks.twitterUsername)
+<meta name="twitter:site" content="@$site.publisherSocialLinks.twitterUsername" />
 #end
 
 <script type="application/ld+json">$jsonSchema</script>

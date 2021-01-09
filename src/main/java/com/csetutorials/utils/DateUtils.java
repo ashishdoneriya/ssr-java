@@ -8,7 +8,7 @@ public class DateUtils {
 
 	public static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
 
-	public static Date parse(String sDate, String pattern) throws ParseException {
+	public static synchronized Date parse(String sDate, String pattern) throws ParseException {
 		if (StringUtils.isBlank(sDate)) {
 			return null;
 		}
@@ -17,7 +17,7 @@ public class DateUtils {
 
 	}
 
-	public String format(Date date, String pattern) {
+	public synchronized String format(Date date, String pattern) {
 		SimpleDateFormat sdf = new SimpleDateFormat(pattern);
 		return sdf.format(date);
 	}

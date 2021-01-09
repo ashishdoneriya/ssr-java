@@ -24,7 +24,8 @@ public class PageUtils {
 		Map<String, CatTag> categoriesMap = new HashMap<>();
 		Map<String, Map<String, Object>> authorsMap = new HashMap<>();
 
-		for (File file : FileUtils.getFilesRecursively(siteConfig.getPostsDir())) {
+		List<File> files = FileUtils.getFilesRecursively(siteConfig.getPostsDir());
+		for (File file : files) {
 			posts.add(getPageInfo(file, siteConfig, tagsMap, categoriesMap, authorsMap, true));
 		}
 
@@ -204,6 +205,18 @@ public class PageUtils {
 		String url = siteConfig.getBaseUrl() + "/" + siteConfig.getAuthorBase() + "/" + authorUsername;
 		url = StringUtils.removeExtraSlash(url);
 		temp2.put("url", url);
+		Map<String, String> socialMediaLinks = (Map<String, String>) temp2.get("socialMediaLinks");
+		if (socialMediaLinks != null) {
+			String twitterUrl = socialMediaLinks.get("twitterUrl");
+			if (StringUtils.isNotBlank(twitterUrl)) {
+				int index = twitterUrl.lastIndexOf("/");
+				String twitterUsername = twitterUrl.substring(index + 1);
+				if (twitterUsername.contains("?")) {
+					twitterUsername = twitterUsername.substring(0, twitterUsername.indexOf('?'));
+				}
+				socialMediaLinks.put("twitterUsername", twitterUsername);
+			}
+		}
 		return temp2;
 	}
 

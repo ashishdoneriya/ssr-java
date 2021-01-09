@@ -10,7 +10,7 @@ public class SocialMediaLinks {
 	private String facebookUrl, twitterUrl, instagram, linkedin, myspace, pinterest, youtube, wikipedia, website;
 	
 	private String twitterUsername;
-	
+
 	private transient List<String> list;
 
 	public String getFacebookUrl() {
@@ -116,18 +116,13 @@ public class SocialMediaLinks {
 	public void setWebsite(String website) {
 		this.website = website;
 	}
-	
-	public String getTwitterUserName() {
-		if (StringUtils.isBlank(this.twitterUrl)) {
-			return null;
-		}
-		if (this.twitterUsername != null) {
-			return this.twitterUsername;
-		}
-		
-		int index = twitterUrl.lastIndexOf("/");
-		this.twitterUsername = this.twitterUrl.substring(index + 1);
-		return this.twitterUsername;
+
+	public String getTwitterUsername() {
+		return twitterUsername;
+	}
+
+	public void setTwitterUsername(String twitterUsername) {
+		this.twitterUsername = twitterUsername;
 	}
 
 }

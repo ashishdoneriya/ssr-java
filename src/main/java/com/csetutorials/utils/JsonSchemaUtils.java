@@ -44,7 +44,8 @@ public class JsonSchemaUtils {
 		graphList.add(generateArticleSchema(page));
 		if (page.getAuthor() != null && (!isPersonItselfAnOrg
 				|| (!this.siteConfig.getDefaultAuthor().equals(page.getAuthor().get("username"))))) {
-			graphList.add(generatePersonSchema((Author) page.getAuthor()));
+			graphList.add(generatePersonSchema(
+					Constants.gson.fromJson(Constants.gson.toJson(page.getAuthor()), Author.class)));
 		}
 
 		Map<String, Object> schemaMap = new LinkedHashMap<>(2);
@@ -167,6 +168,7 @@ public class JsonSchemaUtils {
 			}
 
 			if (StringUtils.isNotBlank(orgInfo.getLogo())) {
+
 				Map<String, Object> logoSchema = new LinkedHashMap<>(5);
 				logoSchema.put("@type", "ImageObject");
 				logoSchema.put("@id", siteConfig.getUrl() + "/#logo");
@@ -175,9 +177,7 @@ public class JsonSchemaUtils {
 				logoSchema.put("caption", siteConfig.getTitle());
 
 				orgSchema.put("logo", logoSchema);
-
 				orgSchema.put("image", createMap("@id", siteConfig.getUrl() + "/#logo"));
-
 			}
 			this.publisherSchema = orgSchema;
 		}
@@ -206,11 +206,6 @@ public class JsonSchemaUtils {
 			authorImageSchema.put("caption", author.getName());
 
 			authorSchema.put("image", authorImageSchema);
-
-			Map<String, Object> logoSchema = new LinkedHashMap<>();
-			logoSchema.put("@id", siteConfig.getUrl() + "/#personlogo");
-
-			authorSchema.put("logo", logoSchema);
 		}
 		if (author.getSocialMediaLinks() != null) {
 			authorSchema.put("sameAs", author.getSocialMediaLinks().getSocialLinks());

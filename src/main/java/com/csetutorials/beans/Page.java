@@ -17,7 +17,7 @@ public class Page {
 
 	private String layout;
 
-	private String slug, permalink, url;
+	private String slug, permalink, url, absoluteUrl;
 
 	private Map<String, String> rawParams;
 
@@ -35,8 +35,6 @@ public class Page {
 	private Page next, previous;
 
 	private List<Image> images;
-
-	private String absoluteUrl;
 
 	private String lastMod;
 

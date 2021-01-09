@@ -22,7 +22,7 @@ public class SiteConfig {
 	private String postPermalink;
 	private String pagePermalink;
 	private boolean pageUglyUrlEnabled;
-	private boolean postUglyUrlEnabled;
+	private boolean postUglyUrlEnabled = true;
 	private String generatedHtmlDir;
 	private String postsDir;
 	private String pagesDir;

@@ -140,7 +140,7 @@ public class SiteUtils {
 		map.put("tags", page.getTags());
 		map.put("isDraft", page.getIsDraft());
 		map.put("summary", page.getSummary());
-
+		map.put("absoluteUrl", page.getAbsoluteUrl());
 		return map;
 	}
 
@@ -320,6 +320,7 @@ public class SiteUtils {
 		context.put("contentType", isPost ? "post" : "page");
 		context.put("data", siteConfig.getData());
 		context.put("dateUtils", new DateUtils());
+		context.put("StringUtils", StringUtils.class);
 		final String metaTagsFormat = FileUtils.getResourceContent("post-meta-tags.html");
 		TemplateUtils.addTemplate(siteConfig, "ssj-meta-tags", metaTagsFormat);
 		for (Page page : pages) {

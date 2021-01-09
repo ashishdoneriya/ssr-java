@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.csetutorials.beans.Author;
 import com.csetutorials.beans.SiteConfig;
+import com.csetutorials.beans.SocialMediaLinks;
 import com.google.gson.JsonSyntaxException;
 
 public class DataUtils {
@@ -82,6 +83,23 @@ public class DataUtils {
 					authors.get(siteConfig.getSeoSettings().getPersonUsername()).getSocialMediaLinks());
 		} else {
 			siteConfig.setPublisherSocialLinks(siteConfig.getSeoSettings().getOrganizationInfo().getSocialMediaLinks());
+		}
+		siteConfig.getRawConfig().put("publisherSocialLinks", siteConfig.getPublisherSocialLinks());
+		setTwitterUsername(siteConfig.getPublisherSocialLinks());
+	}
+
+	private static void setTwitterUsername(SocialMediaLinks publisherSocialLinks) {
+		if (publisherSocialLinks == null) {
+			return;
+		}
+		String twitterUrl = publisherSocialLinks.getTwitterUrl();
+		if (StringUtils.isNotBlank(twitterUrl)) {
+			int index = twitterUrl.lastIndexOf("/");
+			String twitterUsername = twitterUrl.substring(index + 1);
+			if (twitterUsername.contains("?")) {
+				twitterUsername = twitterUsername.substring(0, twitterUsername.indexOf('?'));
+			}
+			publisherSocialLinks.setTwitterUsername(twitterUsername);
 		}
 	}
 
