@@ -40,7 +40,7 @@
 <meta property="article:published_time" content="$dateUtils.getSiteMapString($page.created)" />
 #end
 #if ($site.publisherSocialLinks && $StringUtils.isNotBlank($site.publisherSocialLinks.facebookUrl))
-<meta property="article:publisher" content="$site.publisherSocialLinks.facebookUrl />
+<meta property="article:publisher" content="$site.publisherSocialLinks.facebookUrl" />
 #end
 #if ($page.categories)
 #foreach( $category in $page.categories )

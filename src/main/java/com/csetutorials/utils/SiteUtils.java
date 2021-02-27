@@ -33,19 +33,19 @@ import com.csetutorials.beans.Page;
 import com.csetutorials.beans.Paginator;
 import com.csetutorials.beans.SiteConfig;
 import com.csetutorials.contants.Layouts;
+import com.csetutorials.contants.Paths;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 public class SiteUtils {
 
-	public static SiteConfig getSiteConfig(String root) throws JsonSyntaxException, IOException {
-		String json = FileUtils.getString(root + "/ssj.json");
+	public static SiteConfig getSiteConfig() throws JsonSyntaxException, IOException {
+		String json = FileUtils.getString(Paths.getSiteConfigDir());
 		Type type = new TypeToken<Map<String, Object>>() {
 		}.getType();
 		Map<String, Object> rawConfig = Constants.gson.fromJson(json, type);
 		SiteConfig config = Constants.gson.fromJson(json, SiteConfig.class);
 		config.setRawConfig(rawConfig);
-		config.setRoot(root);
 		config.setActiveThemeDir(getActiveThemeDir(config));
 		return config;
 	}
@@ -125,7 +125,7 @@ public class SiteUtils {
 
 	private static Map<String, Object> createMap(Page page) throws IOException {
 		Map<String, Object> map = new HashMap<>();
-		for (Map.Entry<String, String> e : page.getRawParams().entrySet()) {
+		for (Entry<String, Object> e : page.getRawParams().entrySet()) {
 			map.put(e.getKey(), e.getValue());
 		}
 		map.put("title", page.getTitle());
@@ -184,11 +184,12 @@ public class SiteUtils {
 				previousPageUrl = StringUtils.removeExtraSlash(previousPageUrl);
 				paginator.setPreviousPageUrl(previousPageUrl);
 			}
-			String currentPageFilePath = siteConfig.getGeneratedHtmlDir() + File.separator + siteConfig.getBaseUrl()
+			String currentPageFilePath = Paths.getGeneratedHtmlDir() + File.separator + siteConfig.getBaseUrl()
 					+ File.separator + siteConfig.getIndexPostsBase() + File.separator
 					+ (i == 1 ? "index.html" : "/page" + File.separator + i + File.separator + "index.html");
 			context.put("paginator", paginator);
 			String pageLayoutContent = TemplateUtils.formatContent(engine, context, siteConfig.getLatestPostsLayout());
+			pageLayoutContent = Jsoup.parse(pageLayoutContent).toString();
 			FileUtils.write(currentPageFilePath, pageLayoutContent);
 		}
 	}
@@ -237,7 +238,7 @@ public class SiteUtils {
 					previousPageUrl = StringUtils.removeExtraSlash(previousPageUrl);
 					paginator.setPreviousPageUrl(previousPageUrl);
 				}
-				String currentPageFilePath = siteConfig.getGeneratedHtmlDir() + File.separator + siteConfig.getBaseUrl()
+				String currentPageFilePath = Paths.getGeneratedHtmlDir() + File.separator + siteConfig.getBaseUrl()
 						+ File.separator + siteConfig.getCategoryBase() + File.separator + cat.getShortcode()
 						+ File.separator
 						+ (i == 1 ? "index.html" : "/page" + File.separator + i + File.separator + "index.html");
@@ -245,6 +246,7 @@ public class SiteUtils {
 				context.put("category", cat);
 				String pageLayoutContent = TemplateUtils.formatContent(engine, context,
 						siteConfig.getCategoriesLayout());
+				pageLayoutContent = Jsoup.parse(pageLayoutContent).toString();
 				FileUtils.write(currentPageFilePath, pageLayoutContent);
 			}
 		}
@@ -293,12 +295,13 @@ public class SiteUtils {
 					previousPageUrl = StringUtils.removeExtraSlash(previousPageUrl);
 					paginator.setPreviousPageUrl(previousPageUrl);
 				}
-				String currentPageFilePath = siteConfig.getGeneratedHtmlDir() + File.separator + siteConfig.getBaseUrl()
+				String currentPageFilePath = Paths.getGeneratedHtmlDir() + File.separator + siteConfig.getBaseUrl()
 						+ File.separator + siteConfig.getTagBase() + File.separator + tag.getName() + File.separator
 						+ (i == 1 ? "index.html" : "/page" + File.separator + i + File.separator + "index.html");
 				context.put("paginator", paginator);
 				context.put("tag", tag);
 				String pageLayoutContent = TemplateUtils.formatContent(engine, context, siteConfig.getTagsLayout());
+				pageLayoutContent = Jsoup.parse(pageLayoutContent).toString();
 				FileUtils.write(currentPageFilePath, pageLayoutContent);
 			}
 		}
@@ -313,7 +316,8 @@ public class SiteUtils {
 		return sub;
 	}
 
-	public static void generatePosts(List<Page> pages, SiteConfig siteConfig, boolean isPost, JsonSchemaUtils jsonSchemaUtils) throws IOException {
+	public static void generatePosts(List<Page> pages, SiteConfig siteConfig, boolean isPost,
+			JsonSchemaUtils jsonSchemaUtils) throws IOException {
 		VelocityContext context = new VelocityContext();
 		VelocityEngine engine = siteConfig.getEngine();
 		context.put("site", siteConfig.getRawConfig());
@@ -344,6 +348,7 @@ public class SiteUtils {
 			final String metaTags = TemplateUtils.formatContent(engine, context, "ssj-meta-tags");
 			context.put("seoSettings", metaTags);
 			String postLayoutContent = TemplateUtils.formatContent(engine, context, page.getLayout());
+			postLayoutContent = Jsoup.parse(postLayoutContent).toString();
 			write(page.getPermalink(), postLayoutContent, siteConfig,
 					isPost ? siteConfig.isPostUglyUrlEnabled() : siteConfig.isPageUglyUrlEnabled());
 		}
@@ -370,7 +375,7 @@ public class SiteUtils {
 				if (slashLastIndex != -1) {
 					alt = src.substring(slashLastIndex + 1);
 				}
-				alt = alt.split(".")[0].replaceAll("-", " ");
+				alt = alt.split("\\.")[0].replaceAll("-", " ");
 			}
 			Image image = new Image();
 			image.setAlt(alt);
@@ -383,7 +388,7 @@ public class SiteUtils {
 	public static void write(String permalink, String content, SiteConfig siteConfig, boolean uglyUrl)
 			throws FileNotFoundException {
 		permalink = "/" + permalink + (uglyUrl ? "" : "/index.html");
-		String path = siteConfig.getGeneratedHtmlDir() + permalink;
+		String path = Paths.getGeneratedHtmlDir() + permalink;
 		path = path.replaceAll("/+", "/").replaceAll("/", File.separator);
 		File file = new File(path);
 		file.getParentFile().mkdirs();
@@ -393,7 +398,7 @@ public class SiteUtils {
 	public static void writePost(String postPermalink, String postContent, SiteConfig siteConfig)
 			throws FileNotFoundException {
 		postPermalink = "/" + postPermalink + (siteConfig.isPostUglyUrlEnabled() ? "" : "/index.html");
-		String path = siteConfig.getGeneratedHtmlDir() + postPermalink;
+		String path = Paths.getGeneratedHtmlDir() + postPermalink;
 		path = path.replaceAll("/+", "/").replaceAll("/", File.separator);
 		File file = new File(path);
 		file.getParentFile().mkdirs();
@@ -467,12 +472,13 @@ public class SiteUtils {
 					previousPageUrl = StringUtils.removeExtraSlash(previousPageUrl);
 					paginator.setPreviousPageUrl(previousPageUrl);
 				}
-				String currentPageFilePath = siteConfig.getGeneratedHtmlDir() + File.separator + siteConfig.getBaseUrl()
+				String currentPageFilePath = Paths.getGeneratedHtmlDir() + File.separator + siteConfig.getBaseUrl()
 						+ File.separator + siteConfig.getAuthorBase() + File.separator + authorName + File.separator
 						+ (i == 1 ? "index.html" : "/page" + File.separator + i + File.separator + "index.html");
 				context.put("paginator", paginator);
 				context.put("author", list.get(0).getAuthor());
 				String pageLayoutContent = TemplateUtils.formatContent(engine, context, siteConfig.getAuthorLayout());
+				pageLayoutContent = Jsoup.parse(pageLayoutContent).toString();
 				FileUtils.write(currentPageFilePath, pageLayoutContent);
 			}
 		}

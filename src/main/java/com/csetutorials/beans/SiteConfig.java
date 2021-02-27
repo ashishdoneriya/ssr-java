@@ -6,16 +6,14 @@ import java.util.Map;
 
 import org.apache.velocity.app.VelocityEngine;
 
-import com.csetutorials.utils.StringUtils;
-
 public class SiteConfig {
+
 	private String title;
 	private String baseUrl;
 	private String tagline;
 	private String description;
 	private String url;
 	private String favicon;
-	private String postWritingDataFormat;
 	private String postLayout;
 	private String pageLayout;
 	private String category;
@@ -23,11 +21,6 @@ public class SiteConfig {
 	private String pagePermalink;
 	private boolean pageUglyUrlEnabled;
 	private boolean postUglyUrlEnabled = true;
-	private String generatedHtmlDir;
-	private String postsDir;
-	private String pagesDir;
-	private String tempDir;
-	private String dataDir;
 	private String themesDir;
 	private String categoryBase;
 	private String tagBase;
@@ -44,14 +37,13 @@ public class SiteConfig {
 	private transient String authorLayout;
 	private transient String activeThemeDir;
 
-	private transient String root, tempLayoutsPath;
 	private transient Map<String, Object> rawConfig;
 	private transient VelocityEngine velocityEngine;
 	private List<Page> posts, pages;
 	private List<CatTag> categories, tags;
 	private Map<String, Object> data;
 	private transient Map<String, Author> authors;
-	
+
 	private SocialMediaLinks publisherSocialLinks;
 
 	public SiteConfig() {
@@ -65,11 +57,6 @@ public class SiteConfig {
 		this.postUglyUrlEnabled = true;
 		this.pagePermalink = "/:slug";
 		this.pageUglyUrlEnabled = true;
-		this.generatedHtmlDir = File.separator + "dist";
-		this.postsDir = File.separator + "posts";
-		this.pagesDir = File.separator + "pages";
-		this.tempDir = File.separator + "temp";
-		this.dataDir = File.separator + "data";
 		this.setCategoriesLayout("category.html");
 		this.setTagsLayout("tag.html");
 		this.setCategoryBase("topics");
@@ -81,14 +68,13 @@ public class SiteConfig {
 		this.setPaginationEnabled(true);
 		this.setMaxPosts(10);
 		this.setThemesDir(File.separator + "themes");
-		this.postWritingDataFormat = "yyyy-MM-dd'T'HH:mm:ssXXX";
-	}
-
-	public SiteConfig(boolean blank) {
-
 	}
 
 	// Getter Methods
+
+	public SiteConfig(boolean b) {
+		// TODO Auto-generated constructor stub
+	}
 
 	public String getTitle() {
 		return title;
@@ -104,10 +90,6 @@ public class SiteConfig {
 
 	public String getUrl() {
 		return url;
-	}
-
-	public String getPostWritingDataFormat() {
-		return postWritingDataFormat;
 	}
 
 	public String getDefaultAuthor() {
@@ -138,18 +120,6 @@ public class SiteConfig {
 		return postUglyUrlEnabled;
 	}
 
-	public String getGeneratedHtmlDir() {
-		return generatedHtmlDir;
-	}
-
-	public String getPostsDir() {
-		return postsDir;
-	}
-
-	public String getPagesDir() {
-		return pagesDir;
-	}
-
 	public void setTitle(String title) {
 		this.title = title;
 	}
@@ -164,10 +134,6 @@ public class SiteConfig {
 
 	public void setUrl(String url) {
 		this.url = url;
-	}
-
-	public void setPostWritingDataFormat(String postWritingDataFormat) {
-		this.postWritingDataFormat = postWritingDataFormat;
 	}
 
 	public void setPostLayout(String postLayout) {
@@ -194,55 +160,12 @@ public class SiteConfig {
 		this.postUglyUrlEnabled = postUglyUrlEnabled;
 	}
 
-	public void setGeneratedHtmlDir(String generatedHtmlDir) {
-		this.generatedHtmlDir = generatedHtmlDir;
-	}
-
-	public void setPostsDir(String postsDir) {
-		this.postsDir = postsDir;
-	}
-
-	public void setPagesDir(String pagesDir) {
-		this.pagesDir = pagesDir;
-	}
-
 	public String getPagePermalink() {
 		return pagePermalink;
 	}
 
 	public void setPagePermalink(String pagePermalink) {
 		this.pagePermalink = pagePermalink;
-	}
-
-	public String getTempDir() {
-		return tempDir;
-	}
-
-	public void setTempDir(String tempDir) {
-		this.tempDir = tempDir;
-	}
-
-	public String getRoot() {
-		return root;
-	}
-
-	public void setRoot(String root) {
-		this.root = StringUtils.removeExtraSlash(root);
-		this.postsDir = StringUtils.removeExtraSlash(this.root + File.separator + this.postsDir);
-		this.pagesDir = StringUtils.removeExtraSlash(this.root + File.separator + this.pagesDir);
-		this.generatedHtmlDir = StringUtils.removeExtraSlash(this.root + File.separator + this.generatedHtmlDir);
-		this.tempDir = StringUtils.removeExtraSlash(this.root + File.separator + this.tempDir);
-		this.tempLayoutsPath = StringUtils.removeExtraSlash(this.tempDir + File.separator + "layouts");
-		this.dataDir = StringUtils.removeExtraSlash(this.root + File.separator + this.dataDir);
-		this.themesDir = StringUtils.removeExtraSlash(this.root + File.separator + this.themesDir);
-	}
-
-	public String getTempLayoutsPath() {
-		return tempLayoutsPath;
-	}
-
-	public void setTempLayoutsPath(String tempLayoutsPath) {
-		this.tempLayoutsPath = tempLayoutsPath;
 	}
 
 	public Map<String, Object> getRawConfig() {
@@ -323,14 +246,6 @@ public class SiteConfig {
 
 	public void setMaxPosts(int maxPosts) {
 		this.maxPosts = maxPosts;
-	}
-
-	public String getDataDir() {
-		return dataDir;
-	}
-
-	public void setDataDir(String dataDir) {
-		this.dataDir = dataDir;
 	}
 
 	public String getAuthorBase() {

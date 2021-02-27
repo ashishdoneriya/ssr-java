@@ -14,11 +14,12 @@ import org.apache.velocity.app.VelocityEngine;
 
 import com.csetutorials.beans.Page;
 import com.csetutorials.beans.SiteConfig;
+import com.csetutorials.contants.Paths;
 
 public class SitemapCreator {
 
 	public static void createSiteMap(SiteConfig siteConfig, List<Page> posts, List<Page> pages) throws IOException {
-		String currentPageFilePath = siteConfig.getGeneratedHtmlDir() + File.separator + "main-sitemap.xsl";
+		String currentPageFilePath = Paths.getGeneratedHtmlDir() + File.separator + "main-sitemap.xsl";
 		FileUtils.write(currentPageFilePath, FileUtils.getResourceContent("main-sitemap.xsl"));
 		Date postsLastUpdated = createPageSiteMap(siteConfig, posts, true);
 		Date pagesLastUpdated = createPageSiteMap(siteConfig, pages, false);
@@ -54,7 +55,7 @@ public class SitemapCreator {
 
 		String content = TemplateUtils.formatContent(engine, context, "sitemap_index.xml");
 
-		String currentPageFilePath = siteConfig.getGeneratedHtmlDir() + File.separator + "sitemap_index.xml";
+		String currentPageFilePath = Paths.getGeneratedHtmlDir() + File.separator + "sitemap_index.xml";
 		FileUtils.write(currentPageFilePath, content);
 	}
 
@@ -82,7 +83,7 @@ public class SitemapCreator {
 
 		String content = TemplateUtils.formatContent(engine, context, "page-sitemap.xml");
 
-		String currentPageFilePath = siteConfig.getGeneratedHtmlDir() + File.separator
+		String currentPageFilePath = Paths.getGeneratedHtmlDir() + File.separator
 				+ (arePosts ? "post-sitemap.xml" : "page-sitemap.xml");
 		FileUtils.write(currentPageFilePath, content);
 		return lastUpdated;

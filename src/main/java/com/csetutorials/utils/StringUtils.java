@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.yaml.snakeyaml.Yaml;
+
 public class StringUtils {
 
 	public static String removeQuotesAndBlocks(String str) {
@@ -42,8 +44,35 @@ public class StringUtils {
 		String temp1 = content.substring(index4 + 1).trim();
 		return temp1;
 	}
+	
+	public static Map<String, Object> getRawParams(String content) {
+		int index1 = content.indexOf("---");
+		Map<String, Object> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		if (index1 == -1) {
+			return map;
+		}
+		int index2 = content.indexOf("\n", index1 + 1);
+		if (index2 == -1) {
+			return map;
+		}
+		int index3 = content.indexOf("---", index2 + 1);
+		if (index3 == -1) {
+			return map;
+		}
+		int index4 = content.indexOf("\n", index3 + 1);
+		if (index4 == -1) {
+			return map;
+		}
+		String temp1 = content.substring(index2 + 1, index3 - 1).trim();
+		if (temp1.isEmpty()) {
+			return map;
+		}
+		Yaml yaml = new Yaml();
+		Map<String, Object> obj = yaml.load(temp1);
+		return obj;
+	}
 
-	public static Map<String, String> getRawParams(String content) {
+	public static Map<String, String> getRawParams1(String content) {
 		int index1 = content.indexOf("---");
 		Map<String, String> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		if (index1 == -1) {

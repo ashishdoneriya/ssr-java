@@ -19,7 +19,7 @@ public class Page {
 
 	private String slug, permalink, url, absoluteUrl;
 
-	private Map<String, String> rawParams;
+	private Map<String, Object> rawParams;
 
 	// For posts
 	private String summary;
@@ -106,12 +106,12 @@ public class Page {
 		this.permalink = permalink;
 	}
 
-	public Map<String, String> getRawParams() {
+	public Map<String, Object> getRawParams() {
 		return rawParams;
 	}
 
-	public void setRawParams(Map<String, String> rawParams) {
-		this.rawParams = rawParams;
+	public void setRawParams(Map<String, Object> rawParams2) {
+		this.rawParams = rawParams2;
 	}
 
 	public File getFile() {

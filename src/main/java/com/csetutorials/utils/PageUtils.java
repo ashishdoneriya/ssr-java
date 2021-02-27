@@ -1,10 +1,10 @@
 package com.csetutorials.utils;
 
 import java.io.File;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,6 +14,7 @@ import java.util.Set;
 import com.csetutorials.beans.CatTag;
 import com.csetutorials.beans.Page;
 import com.csetutorials.beans.SiteConfig;
+import com.csetutorials.contants.Paths;
 
 public class PageUtils {
 
@@ -24,7 +25,7 @@ public class PageUtils {
 		Map<String, CatTag> categoriesMap = new HashMap<>();
 		Map<String, Map<String, Object>> authorsMap = new HashMap<>();
 
-		List<File> files = FileUtils.getFilesRecursively(siteConfig.getPostsDir());
+		List<File> files = FileUtils.getFilesRecursively(Paths.getPostsDir());
 		for (File file : files) {
 			posts.add(getPageInfo(file, siteConfig, tagsMap, categoriesMap, authorsMap, true));
 		}
@@ -66,7 +67,7 @@ public class PageUtils {
 
 		Map<String, Map<String, Object>> authorsMap = new HashMap<>();
 
-		for (File file : FileUtils.getFilesRecursively(siteConfig.getPagesDir())) {
+		for (File file : FileUtils.getFilesRecursively(Paths.getPagesDir())) {
 			pages.add(getPageInfo(file, siteConfig, null, null, authorsMap, false));
 		}
 		siteConfig.setPages(pages);
@@ -78,12 +79,12 @@ public class PageUtils {
 			Map<String, CatTag> categoriesMap, Map<String, Map<String, Object>> authorsMap, boolean isPost)
 			throws Exception {
 		String fileContent = FileUtils.getString(file);
-		Map<String, String> rawParams = StringUtils.getRawParams(fileContent);
+		Map<String, Object> rawParams = StringUtils.getRawParams(fileContent);
 
 		Page page = new Page();
 
 		// Setting post title
-		String title = rawParams.get("title");
+		String title = (String) rawParams.get("title");
 		if (title == null) {
 			if (isPost) {
 				throw new Exception("Title missing in post - " + file.getAbsolutePath());
@@ -93,65 +94,38 @@ public class PageUtils {
 		}
 		page.setTitle(title);
 
-		// Setting post created date
-		String sCreated = rawParams.get("created");
-		if (sCreated == null) {
-			sCreated = rawParams.get("date");
-		}
-		if (sCreated != null) {
-			try {
-				page.setCreated(DateUtils.parse(sCreated, siteConfig.getPostWritingDataFormat()));
-			} catch (ParseException e) {
-				System.out.println("In file :" + file.getAbsolutePath());
-				e.printStackTrace();
-				System.exit(1);
-			}
-		}
-
-		// Setting post updated date
-		String sUpdated = rawParams.get("updated");
-		if (sUpdated == null) {
-			sUpdated = rawParams.get("lastmod");
-		}
-		if (sUpdated != null) {
-			try {
-				page.setUpdated(DateUtils.parse(sUpdated, siteConfig.getPostWritingDataFormat()));
-			} catch (ParseException e) {
-				System.out.println("In file :" + file.getAbsolutePath());
-				e.printStackTrace();
-				System.exit(1);
-			}
-		} else {
-			page.setUpdated(page.getCreated());
-		}
+		page.setCreated((Date) rawParams.get("created"));
+		page.setUpdated((Date) rawParams.get("updated"));
 
 		page.setLastMod(DateUtils.getSiteMapString(page.getUpdated()));
 
 		// Setting is draft
-		String sIsDraft = rawParams.get("isDraft");
+		String sIsDraft = (String) rawParams.get("isDraft");
 		if (sIsDraft != null) {
 			page.setDraft(Boolean.valueOf(sIsDraft));
 		}
 
 		if (isPost) {
 			// Setting categories
-			page.setCategories(
-					createCategories(categoriesMap, siteConfig, StringUtils.parseList(rawParams.get("categories"))));
-			page.setTags(createTags(tagsMap, siteConfig, StringUtils.parseList(rawParams.get("tags"))));
+			page.setCategories(createCategories(categoriesMap, siteConfig, (List<String>) rawParams.get("categories")));
+			page.setTags(createTags(tagsMap, siteConfig, (List<String>) rawParams.get("tags")));
 		}
 
 		// Setting author info
-		String author = rawParams.get("author");
+		String author = (String) rawParams.get("author");
 		if (StringUtils.isBlank(author)) {
 			author = siteConfig.getDefaultAuthor();
 		}
 		page.setAuthor(createAuthor(authorsMap, siteConfig, author));
 
 		// Setting summary
-		page.setSummary(rawParams.get("summary"));
+		page.setSummary((String) rawParams.get("summary"));
+		if (page.getSummary() == null) {
+			page.setSummary((String) rawParams.get("description"));
+		}
 
 		// Setting layout
-		String layout = rawParams.get("layout");
+		String layout = (String) rawParams.get("layout");
 		if (StringUtils.isBlank(layout)) {
 			layout = isPost ? siteConfig.getPostLayout() : siteConfig.getPageLayout();
 
@@ -159,7 +133,7 @@ public class PageUtils {
 		page.setLayout(layout);
 
 		// Setting slug
-		String slug = rawParams.get("slug");
+		String slug = (String) rawParams.get("slug");
 		if (StringUtils.isBlank(slug)) {
 			slug = file.getName();
 			if (slug.contains(".")) {
@@ -172,7 +146,7 @@ public class PageUtils {
 		}
 		page.setSlug(slug);
 		// Setting permalink
-		String permalink = rawParams.get("permalink");
+		String permalink = (String) rawParams.get("permalink");
 		if (StringUtils.isBlank(permalink)) {
 			permalink = siteConfig.getPostPermalink();
 		}
@@ -222,6 +196,9 @@ public class PageUtils {
 
 	private static List<CatTag> createTags(Map<String, CatTag> tagsMap, SiteConfig siteConfig, List<String> sTagsList) {
 		List<CatTag> tags = new ArrayList<>();
+		if (sTagsList == null) {
+			return tags;
+		}
 		for (String sTag : sTagsList) {
 			CatTag tag = tagsMap.get(sTag);
 			if (tag != null) {
@@ -287,7 +264,15 @@ public class PageUtils {
 		for (Page postInfo : pages) {
 			categories.addAll(postInfo.getCategories());
 		}
-		return new ArrayList<>(categories);
+		List<CatTag> list = new ArrayList<>(categories);
+		Collections.sort(list, new Comparator<CatTag>() {
+
+			@Override
+			public int compare(CatTag o1, CatTag o2) {
+				return o1.getShortcode().compareTo(o2.getShortcode());
+			}
+		});
+		return list;
 	}
 
 	public static List<CatTag> extractTags(List<Page> pages, SiteConfig siteConfig) {

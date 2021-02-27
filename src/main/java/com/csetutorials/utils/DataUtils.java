@@ -8,12 +8,13 @@ import java.util.Map;
 import com.csetutorials.beans.Author;
 import com.csetutorials.beans.SiteConfig;
 import com.csetutorials.beans.SocialMediaLinks;
+import com.csetutorials.contants.Paths;
 import com.google.gson.JsonSyntaxException;
 
 public class DataUtils {
 
 	public static void readData(SiteConfig siteConfig) throws JsonSyntaxException, IOException {
-		File dataDir = new File(siteConfig.getDataDir());
+		File dataDir = new File(Paths.getDataDir());
 		Map<String, Object> map = new HashMap<>();
 		if (!dataDir.exists() || dataDir.list().length == 0) {
 			siteConfig.setData(new HashMap<String, Object>(1));
@@ -74,8 +75,11 @@ public class DataUtils {
 	@SuppressWarnings("unchecked")
 	public static void loadAllAuthors(SiteConfig siteConfig) {
 		Map<String, Object> map = siteConfig.getData();
-		Map<String, Author> authors = (Map<String, Author>) map.get("authors");
-
+		Map<String, Object> authors1 = (Map<String, Object>) map.get("authors");
+		Map<String, Author> authors = new HashMap<>();
+		for (Map.Entry<String, Object> e : authors1.entrySet()) {
+			authors.put(e.getKey(), Constants.gson.fromJson(Constants.gson.toJson(e.getValue()), Author.class));
+		}
 		siteConfig.setAuthors(authors);
 
 		if (siteConfig.getSeoSettings().getIsPerson()) {

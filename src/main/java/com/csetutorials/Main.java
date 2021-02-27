@@ -22,6 +22,7 @@ import com.csetutorials.beans.SeoSettings;
 import com.csetutorials.beans.SiteConfig;
 import com.csetutorials.beans.SocialMediaLinks;
 import com.csetutorials.contants.DefaultDirs;
+import com.csetutorials.contants.Paths;
 import com.csetutorials.utils.Constants;
 import com.csetutorials.utils.DataUtils;
 import com.csetutorials.utils.FileUtils;
@@ -39,8 +40,8 @@ public class Main {
 		CommandLine cmd = getCommands(args);
 
 		String root = cmd.getOptionValue("build", new File("").getAbsolutePath());
-
-		SiteConfig siteConfig = SiteUtils.getSiteConfig(root);
+		Paths.rootDir = StringUtils.removeExtraSlash(root);
+		SiteConfig siteConfig = SiteUtils.getSiteConfig();
 
 		DataUtils.readData(siteConfig);
 		DataUtils.loadAllAuthors(siteConfig);
@@ -67,9 +68,9 @@ public class Main {
 		SiteUtils.generateAuthorsPages(siteConfig, authorsPosts);
 		SitemapCreator.createSiteMap(siteConfig, posts, pages);
 		FileUtils.copyDirRecursively(siteConfig.getActiveThemeDir() + File.separator + DefaultDirs.staticDir,
-				siteConfig.getGeneratedHtmlDir());
-		FileUtils.copyDirRecursively(siteConfig.getRoot() + File.separator + DefaultDirs.staticDir,
-				siteConfig.getGeneratedHtmlDir());
+				Paths.getGeneratedHtmlDir());
+		FileUtils.copyDirRecursively(Paths.getRoot() + File.separator + DefaultDirs.staticDir,
+				Paths.getGeneratedHtmlDir());
 	}
 
 	private static void generateSampleSite() throws FileNotFoundException {

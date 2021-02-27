@@ -21,6 +21,7 @@ import org.commonmark.renderer.html.HtmlRenderer;
 
 import com.csetutorials.beans.SiteConfig;
 import com.csetutorials.contants.DefaultDirs;
+import com.csetutorials.contants.Paths;
 
 public class TemplateUtils {
 
@@ -36,7 +37,7 @@ public class TemplateUtils {
 				.getApplicationAttribute(StringResourceLoader.REPOSITORY_NAME_DEFAULT);
 
 		createLayouts(config);
-		for (File file : FileUtils.getFilesRecursively(config.getTempLayoutsPath())) {
+		for (File file : FileUtils.getFilesRecursively(Paths.getTempLayoutsDir())) {
 			repo.putStringResource(file.getName(), FileUtils.getString(file.getAbsolutePath()));
 		}
 		repo.putStringResource("sitemap_index.xml", FileUtils.getResourceContent("sitemap_index.xml"));
@@ -83,20 +84,17 @@ public class TemplateUtils {
 		// Extracting themes layouts
 		for (File layoutFile : FileUtils
 				.getFilesRecursively(siteConfig.getActiveThemeDir() + File.separator + DefaultDirs.layouts)) {
-			FileUtils.copyFile(layoutFile,
-					new File(siteConfig.getTempLayoutsPath() + File.separator + layoutFile.getName()));
+			FileUtils.copyFile(layoutFile, new File(Paths.getTempLayoutsDir() + File.separator + layoutFile.getName()));
 		}
 
-		for (File layoutFile : FileUtils
-				.getFilesRecursively(siteConfig.getRoot() + File.separator + DefaultDirs.layouts)) {
-			FileUtils.copyFile(layoutFile,
-					new File(siteConfig.getTempLayoutsPath() + File.separator + layoutFile.getName()));
+		for (File layoutFile : FileUtils.getFilesRecursively(Paths.getRoot() + File.separator + DefaultDirs.layouts)) {
+			FileUtils.copyFile(layoutFile, new File(Paths.getTempLayoutsDir() + File.separator + layoutFile.getName()));
 		}
 
 		// Creating actual layouts
-		for (File templateFile : FileUtils.getFilesRecursively(siteConfig.getTempLayoutsPath())) {
-			String templateContent = generateTemplate(siteConfig.getTempLayoutsPath(), templateFile.getName());
-			FileUtils.write(siteConfig.getTempLayoutsPath() + File.separator + templateFile.getName(), templateContent);
+		for (File templateFile : FileUtils.getFilesRecursively(Paths.getTempLayoutsDir())) {
+			String templateContent = generateTemplate(Paths.getTempLayoutsDir(), templateFile.getName());
+			FileUtils.write(Paths.getTempLayoutsDir() + File.separator + templateFile.getName(), templateContent);
 		}
 	}
 
@@ -105,11 +103,11 @@ public class TemplateUtils {
 		String fileContent = FileUtils.getString(layoutPath + templateName);
 		while (true) {
 
-			Map<String, String> params = StringUtils.getRawParams(fileContent);
+			Map<String, Object> params = StringUtils.getRawParams(fileContent);
 			if (params == null || params.isEmpty() || !params.containsKey("layout")) {
 				return fileContent;
 			}
-			templateName = params.get("layout");
+			templateName = (String) params.get("layout");
 			String parentContent = null;
 			try {
 				parentContent = FileUtils.getString(layoutPath + templateName);
