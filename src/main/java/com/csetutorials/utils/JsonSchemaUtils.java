@@ -43,7 +43,7 @@ public class JsonSchemaUtils {
 		graphList.add(generateWebpageSchema(page));
 		graphList.add(generateArticleSchema(page));
 		if (page.getAuthor() != null && (!isPersonItselfAnOrg
-				|| (!this.siteConfig.getDefaultAuthor().equals(page.getAuthor().get("username"))))) {
+				|| (!this.siteConfig.getDefaultAuthor().equals(page.getAuthor().getUsername())))) {
 			graphList.add(generatePersonSchema(
 					Constants.gson.fromJson(Constants.gson.toJson(page.getAuthor()), Author.class)));
 		}
@@ -89,7 +89,7 @@ public class JsonSchemaUtils {
 		articleSchema.put("@id", post.getAbsoluteUrl() + "#article");
 		articleSchema.put("isPartOf", createMap("@id", post.getAbsoluteUrl() + "#webpage"));
 		articleSchema.put("author",
-				createMap("@id", siteConfig.getUrl() + "/#/schema/person/" + post.getAuthor().get("username")));
+				createMap("@id", siteConfig.getUrl() + "/#/schema/person/" + post.getAuthor().getUsername()));
 		articleSchema.put("headline", post.getTitle());
 		if (post.getCreated() != null) {
 			articleSchema.put("datePublished", DateUtils.getSiteMapString(post.getCreated()));

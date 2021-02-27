@@ -104,4 +104,13 @@ public class FileUtils {
 		return StringUtils.getString(Main.class.getResourceAsStream("/" + fileName));
 	}
 
+	public static void deleteDir(File dir) throws IOException {
+		if (dir.isDirectory()) {
+			for (File file : dir.listFiles())
+				deleteDir(file);
+		}
+		if (!dir.delete())
+			throw new FileNotFoundException("Failed to delete file: " + dir);
+	}
+
 }

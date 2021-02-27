@@ -28,7 +28,7 @@ public class Page {
 
 	private List<CatTag> categories;
 
-	private Map<String, Object> author;
+	private Author author;
 
 	private transient File file;
 
@@ -122,11 +122,11 @@ public class Page {
 		this.file = file;
 	}
 
-	public Map<String, Object> getAuthor() {
+	public Author getAuthor() {
 		return author;
 	}
 
-	public void setAuthor(Map<String, Object> author) {
+	public void setAuthor(Author author) {
 		this.author = author;
 	}
 

@@ -67,7 +67,7 @@ public class SiteUtils {
 				}
 				String themeName = repo.substring(repo.lastIndexOf("/") + 1);
 				repo = repo + ".git";
-				File dir = new File(StringUtils.removeExtraSlash(config.getThemesDir() + File.separator + themeName));
+				File dir = new File(StringUtils.removeExtraSlash(Paths.getThemesDir() + File.separator + themeName));
 				if (dir.exists() && dir.isDirectory() && dir.list().length != 0) {
 					return dir.getAbsolutePath();
 				} else {
@@ -100,7 +100,7 @@ public class SiteUtils {
 					return dir.getAbsolutePath();
 				}
 			} else {
-				File dir = new File(StringUtils.removeExtraSlash(config.getThemesDir() + File.separator + activeTheme));
+				File dir = new File(StringUtils.removeExtraSlash(Paths.getThemesDir() + File.separator + activeTheme));
 				if (dir.exists() && dir.isDirectory()) {
 					return dir.getAbsolutePath();
 				} else {
@@ -110,7 +110,7 @@ public class SiteUtils {
 			}
 
 		}
-		File dir = new File(config.getThemesDir());
+		File dir = new File(Paths.getThemesDir());
 		if (!dir.exists() || !dir.isDirectory() || dir.list().length == 0) {
 			System.out.println("No theme found");
 			System.exit(1);

@@ -35,20 +35,6 @@ public class DataUtils {
 		siteConfig.setData(map);
 	}
 
-	@SuppressWarnings("unchecked")
-	public static Map<String, Object> getAuthorInfo(Map<String, Object> map, String authorUserName,
-			SiteConfig siteConfig) {
-		if (authorUserName == null || authorUserName.isEmpty()) {
-			return null;
-		}
-		Map<String, Object> temp1 = (Map<String, Object>) map.get("authors");
-		if (temp1 == null) {
-			return null;
-		}
-		Map<String, Object> temp2 = (Map<String, Object>) temp1.get(authorUserName);
-		return temp2;
-	}
-
 	private static Object getObject(File file) throws JsonSyntaxException, IOException {
 		return Constants.gson.fromJson(FileUtils.getString(file.getAbsolutePath()), Object.class);
 	}
@@ -72,14 +58,38 @@ public class DataUtils {
 		return map;
 	}
 
-	@SuppressWarnings("unchecked")
-	public static void loadAllAuthors(SiteConfig siteConfig) {
-		Map<String, Object> map = siteConfig.getData();
-		Map<String, Object> authors1 = (Map<String, Object>) map.get("authors");
+	public static void loadAllAuthors(SiteConfig siteConfig) throws IOException {
+		File authorsDir = new File(Paths.getAuthorsDir());
 		Map<String, Author> authors = new HashMap<>();
-		for (Map.Entry<String, Object> e : authors1.entrySet()) {
-			authors.put(e.getKey(), Constants.gson.fromJson(Constants.gson.toJson(e.getValue()), Author.class));
+		for (File authorFile : authorsDir.listFiles()) {
+			String content;
+			try {
+				content = FileUtils.getString(authorFile);
+			} catch (IOException e) {
+				throw new IOException("Problem while reading the file - " + authorFile.getAbsolutePath(), e);
+			}
+			Author authorObj = Constants.gson.fromJson(content, Author.class);
+
+			String username = authorFile.getName().replace(".json", "");
+			authors.put(username, authorObj);
+			String url = siteConfig.getBaseUrl() + "/" + siteConfig.getAuthorBase() + "/" + username;
+			url = StringUtils.removeExtraSlash(url);
+			authorObj.setUrl(url);
+			SocialMediaLinks socialMediaLinks = authorObj.getSocialMediaLinks();
+			if (socialMediaLinks != null) {
+				String twitterUrl = socialMediaLinks.getTwitterUrl();
+				if (StringUtils.isNotBlank(twitterUrl)) {
+					int index = twitterUrl.lastIndexOf("/");
+					String twitterUsername = twitterUrl.substring(index + 1);
+					if (twitterUsername.contains("?")) {
+						twitterUsername = twitterUsername.substring(0, twitterUsername.indexOf('?'));
+					}
+					socialMediaLinks.setTwitterUsername(twitterUsername);
+				}
+			}
+
 		}
+
 		siteConfig.setAuthors(authors);
 
 		if (siteConfig.getSeoSettings().getIsPerson()) {

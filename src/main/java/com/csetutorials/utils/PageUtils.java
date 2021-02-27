@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.csetutorials.beans.Author;
 import com.csetutorials.beans.CatTag;
 import com.csetutorials.beans.Page;
 import com.csetutorials.beans.SiteConfig;
@@ -23,7 +24,7 @@ public class PageUtils {
 
 		Map<String, CatTag> tagsMap = new HashMap<>();
 		Map<String, CatTag> categoriesMap = new HashMap<>();
-		Map<String, Map<String, Object>> authorsMap = new HashMap<>();
+		Map<String, Author> authorsMap = new HashMap<>();
 
 		List<File> files = FileUtils.getFilesRecursively(Paths.getPostsDir());
 		for (File file : files) {
@@ -65,7 +66,7 @@ public class PageUtils {
 	public static List<Page> createPagesMetaData(SiteConfig siteConfig) throws Exception {
 		List<Page> pages = new ArrayList<>();
 
-		Map<String, Map<String, Object>> authorsMap = new HashMap<>();
+		Map<String, Author> authorsMap = new HashMap<>();
 
 		for (File file : FileUtils.getFilesRecursively(Paths.getPagesDir())) {
 			pages.add(getPageInfo(file, siteConfig, null, null, authorsMap, false));
@@ -76,8 +77,7 @@ public class PageUtils {
 	}
 
 	private static Page getPageInfo(File file, SiteConfig siteConfig, Map<String, CatTag> tagsMap,
-			Map<String, CatTag> categoriesMap, Map<String, Map<String, Object>> authorsMap, boolean isPost)
-			throws Exception {
+			Map<String, CatTag> categoriesMap, Map<String, Author> authorsMap, boolean isPost) throws Exception {
 		String fileContent = FileUtils.getString(file);
 		Map<String, Object> rawParams = StringUtils.getRawParams(fileContent);
 
@@ -116,7 +116,7 @@ public class PageUtils {
 		if (StringUtils.isBlank(author)) {
 			author = siteConfig.getDefaultAuthor();
 		}
-		page.setAuthor(createAuthor(authorsMap, siteConfig, author));
+		page.setAuthor(siteConfig.getAuthors().get(author));
 
 		// Setting summary
 		page.setSummary((String) rawParams.get("summary"));
@@ -165,33 +165,6 @@ public class PageUtils {
 		page.setRawParams(rawParams);
 
 		return page;
-	}
-
-	@SuppressWarnings("unchecked")
-	private static Map<String, Object> createAuthor(Map<String, Map<String, Object>> authorsMap, SiteConfig siteConfig,
-			String authorUsername) {
-
-		Map<String, Object> temp1 = (Map<String, Object>) siteConfig.getData().get("authors");
-		if (temp1 == null) {
-			return null;
-		}
-		Map<String, Object> temp2 = (Map<String, Object>) temp1.get(authorUsername);
-		String url = siteConfig.getBaseUrl() + "/" + siteConfig.getAuthorBase() + "/" + authorUsername;
-		url = StringUtils.removeExtraSlash(url);
-		temp2.put("url", url);
-		Map<String, String> socialMediaLinks = (Map<String, String>) temp2.get("socialMediaLinks");
-		if (socialMediaLinks != null) {
-			String twitterUrl = socialMediaLinks.get("twitterUrl");
-			if (StringUtils.isNotBlank(twitterUrl)) {
-				int index = twitterUrl.lastIndexOf("/");
-				String twitterUsername = twitterUrl.substring(index + 1);
-				if (twitterUsername.contains("?")) {
-					twitterUsername = twitterUsername.substring(0, twitterUsername.indexOf('?'));
-				}
-				socialMediaLinks.put("twitterUsername", twitterUsername);
-			}
-		}
-		return temp2;
 	}
 
 	private static List<CatTag> createTags(Map<String, CatTag> tagsMap, SiteConfig siteConfig, List<String> sTagsList) {
@@ -320,7 +293,7 @@ public class PageUtils {
 	public static Map<String, List<Page>> extractAuthorWithRelatedPosts(List<Page> postsMeta) {
 		Map<String, List<Page>> authorWithPostsMap = new HashMap<>();
 		for (Page postInfo : postsMeta) {
-			String author = (String) postInfo.getAuthor().get("shortcode");
+			String author = postInfo.getAuthor().getUsername();
 			List<Page> authorPosts = authorWithPostsMap.get(author);
 			if (authorPosts == null) {
 				authorPosts = new ArrayList<>(2);

@@ -9,7 +9,7 @@ public class Paths {
 	}
 
 	public static String getSiteConfigDir() {
-		return rootDir + "/ssj.conf";
+		return rootDir + "/ssj.json";
 	}
 
 	public static String getPostsDir() {

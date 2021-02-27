@@ -1,6 +1,5 @@
 package com.csetutorials.beans;
 
-import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +20,6 @@ public class SiteConfig {
 	private String pagePermalink;
 	private boolean pageUglyUrlEnabled;
 	private boolean postUglyUrlEnabled = true;
-	private String themesDir;
 	private String categoryBase;
 	private String tagBase;
 	private String authorBase;
@@ -67,7 +65,6 @@ public class SiteConfig {
 		this.setIndexPostsBase("/");
 		this.setPaginationEnabled(true);
 		this.setMaxPosts(10);
-		this.setThemesDir(File.separator + "themes");
 	}
 
 	// Getter Methods
@@ -310,14 +307,6 @@ public class SiteConfig {
 
 	public void setTheme(String theme) {
 		this.theme = theme;
-	}
-
-	public String getThemesDir() {
-		return themesDir;
-	}
-
-	public void setThemesDir(String themesDir) {
-		this.themesDir = themesDir;
 	}
 
 	public String getActiveThemeDir() {

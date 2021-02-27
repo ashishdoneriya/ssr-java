@@ -71,6 +71,7 @@ public class Main {
 				Paths.getGeneratedHtmlDir());
 		FileUtils.copyDirRecursively(Paths.getRoot() + File.separator + DefaultDirs.staticDir,
 				Paths.getGeneratedHtmlDir());
+		FileUtils.deleteDir(new File(Paths.getTempDir()));
 	}
 
 	private static void generateSampleSite() throws FileNotFoundException {
