@@ -340,6 +340,7 @@ public class SiteUtils {
 			TemplateUtils.addTemplate(siteConfig, "test-template-ssr", content);
 			content = TemplateUtils.formatContent(engine, context, "test-template-ssr");
 			List<Image> images = extractImages(siteConfig, content);
+			content = formatAnchorTags(siteConfig, content);
 			page.setImages(images);
 
 			map.put("content", content);
@@ -383,6 +384,20 @@ public class SiteUtils {
 			images.add(image);
 		}
 		return images;
+	}
+	
+	private static String formatAnchorTags(SiteConfig siteConfig, String content) {
+		Document doc = Jsoup.parse(content);
+		Elements anchorTags = doc.select("a");
+		for (Element imageEle : anchorTags) {
+			String href = imageEle.attr("href");
+			if (!href.startsWith("http")) {
+				continue;
+			}
+			imageEle.attr("target", "_blank");
+			imageEle.attr("rel", "noopener nofollow");
+		}
+		return doc.toString();
 	}
 
 	public static void write(String permalink, String content, SiteConfig siteConfig, boolean uglyUrl)

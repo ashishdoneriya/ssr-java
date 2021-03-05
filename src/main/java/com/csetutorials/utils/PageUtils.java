@@ -28,7 +28,10 @@ public class PageUtils {
 
 		List<File> files = FileUtils.getFilesRecursively(Paths.getPostsDir());
 		for (File file : files) {
-			posts.add(getPageInfo(file, siteConfig, tagsMap, categoriesMap, authorsMap, true));
+			Page post = getPageInfo(file, siteConfig, tagsMap, categoriesMap, authorsMap, true);
+			if (post != null) {
+				posts.add(post);
+			}
 		}
 
 		Collections.sort(posts, new Comparator<Page>() {
@@ -80,7 +83,10 @@ public class PageUtils {
 			Map<String, CatTag> categoriesMap, Map<String, Author> authorsMap, boolean isPost) throws Exception {
 		String fileContent = FileUtils.getString(file);
 		Map<String, Object> rawParams = StringUtils.getRawParams(fileContent);
-
+		Boolean isDraft = (Boolean) rawParams.get("isDraft");
+		if (isDraft != null && isDraft) {
+			return null;
+		}
 		Page page = new Page();
 
 		// Setting post title
