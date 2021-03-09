@@ -15,6 +15,7 @@ import org.apache.velocity.runtime.resource.loader.StringResourceLoader;
 import org.apache.velocity.runtime.resource.util.StringResourceRepository;
 import org.commonmark.Extension;
 import org.commonmark.ext.gfm.tables.TablesExtension;
+import org.commonmark.ext.heading.anchor.HeadingAnchorExtension;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
@@ -65,7 +66,7 @@ public class TemplateUtils {
 	}
 
 	public static String parseMarkdown(String content) {
-		List<Extension> extensions = Arrays.asList(TablesExtension.create());
+		List<Extension> extensions = Arrays.asList(TablesExtension.create(), HeadingAnchorExtension.create());
 		Parser parser = Parser.builder().extensions(extensions).build();
 		Node document = parser.parse(content);
 		HtmlRenderer renderer = HtmlRenderer.builder().extensions(extensions).build();
