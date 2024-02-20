@@ -1,5 +1,6 @@
 package com.csetutorials.ssj;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,8 +12,11 @@ public class SsjApplication implements CommandLineRunner {
 		SpringApplication.run(SsjApplication.class, args);
 	}
 
+	@Autowired
+	Main main;
+
 	@Override
 	public void run(String... args) throws Exception {
-		Main.main(args);
+		main.main(args);
 	}
 }

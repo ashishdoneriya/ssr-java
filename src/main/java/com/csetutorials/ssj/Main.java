@@ -2,9 +2,11 @@ package com.csetutorials.ssj;
 
 import com.csetutorials.ssj.beans.*;
 import com.csetutorials.ssj.contants.DefaultDirs;
-import com.csetutorials.ssj.contants.Paths;
+import com.csetutorials.ssj.contants.PathService;
 import com.csetutorials.ssj.utils.*;
 import org.apache.commons.cli.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,44 +14,58 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+@Service
 public class Main {
 
-	public static void main(String[] args) throws Exception {
+	@Autowired
+	PathService pathService;
+	@Autowired
+	SiteService siteService;
+	@Autowired
+	TemplateService templateService;
+	@Autowired
+	DataService dataService;
+	@Autowired
+	PageService pageService;
+	@Autowired
+	SitemapCreator sitemapCreator;
+
+	public void main(String[] args) throws Exception {
 
 		CommandLine cmd = getCommands(args);
 
 		String root = cmd.getOptionValue("build", new File("").getAbsolutePath());
-		Paths.rootDir = StringUtils.removeExtraSlash(root);
-		SiteConfig siteConfig = SiteUtils.getSiteConfig();
+		pathService.setRootDir(StringUtils.removeExtraSlash(root));
+		SiteConfig siteConfig = siteService.getSiteConfig();
 
-		DataUtils.readData(siteConfig);
-		DataUtils.loadAllAuthors(siteConfig);
+		dataService.readData(siteConfig);
+		dataService.loadAllAuthors(siteConfig);
 
-		List<Page> posts = PageUtils.createPostsMetaData(siteConfig);
-		List<Page> pages = PageUtils.createPagesMetaData(siteConfig);
+		List<Page> posts = pageService.createPostsMetaData(siteConfig);
+		List<Page> pages = pageService.createPagesMetaData(siteConfig);
 
-		TemplateUtils.createEngine(siteConfig);
-		Map<CatTag, List<Page>> tagsPosts = PageUtils.extractTagsWithRelatedPosts(posts);
-		Map<CatTag, List<Page>> catsPosts = PageUtils.extractCategoriesWithRelatedPosts(posts);
-		Map<String, List<Page>> authorsPosts = PageUtils.extractAuthorWithRelatedPosts(posts);
+		templateService.createEngine(siteConfig);
+		Map<CatTag, List<Page>> tagsPosts = pageService.extractTagsWithRelatedPosts(posts);
+		Map<CatTag, List<Page>> catsPosts = pageService.extractCategoriesWithRelatedPosts(posts);
+		Map<String, List<Page>> authorsPosts = pageService.extractAuthorWithRelatedPosts(posts);
 
-		siteConfig.getRawConfig().put("tags", PageUtils.extractTags(posts));
-		siteConfig.getRawConfig().put("categories", PageUtils.extractCategories(posts));
+		siteConfig.getRawConfig().put("tags", pageService.extractTags(posts));
+		siteConfig.getRawConfig().put("categories", pageService.extractCategories(posts));
 		siteConfig.getRawConfig().put("tagPosts", tagsPosts);
 		siteConfig.getRawConfig().put("categoriesPosts", catsPosts);
-		SiteUtils.generatePosts(posts, siteConfig, true);
-		SiteUtils.generatePosts(pages, siteConfig, false);
+		siteService.generatePosts(posts, siteConfig, true);
+		siteService.generatePosts(pages, siteConfig, false);
 
-		SiteUtils.generateLatestPostsPages(siteConfig);
-		SiteUtils.generateCategoriesPages(siteConfig, catsPosts);
-		SiteUtils.generateTagsPages(siteConfig, tagsPosts);
-		SiteUtils.generateAuthorsPages(siteConfig, authorsPosts);
-		SitemapCreator.createSiteMap(siteConfig, posts, pages);
+		siteService.generateLatestPostsPages(siteConfig);
+		siteService.generateCategoriesPages(siteConfig, catsPosts);
+		siteService.generateTagsPages(siteConfig, tagsPosts);
+		siteService.generateAuthorsPages(siteConfig, authorsPosts);
+		sitemapCreator.createSiteMap(siteConfig, posts, pages);
 		FileUtils.copyDirRecursively(siteConfig.getActiveThemeDir() + File.separator + DefaultDirs.staticDir,
-				Paths.getGeneratedHtmlDir());
-		FileUtils.copyDirRecursively(Paths.getRoot() + File.separator + DefaultDirs.staticDir,
-				Paths.getGeneratedHtmlDir());
-		FileUtils.deleteDir(new File(Paths.getTempDir()));
+				pathService.getGeneratedHtmlDir());
+		FileUtils.copyDirRecursively(pathService.getRootDir() + File.separator + DefaultDirs.staticDir,
+				pathService.getGeneratedHtmlDir());
+		FileUtils.deleteDir(new File(pathService.getTempDir()));
 	}
 
 	private static void generateSampleSite() throws FileNotFoundException {

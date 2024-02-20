@@ -4,21 +4,27 @@ import com.csetutorials.ssj.beans.Author;
 import com.csetutorials.ssj.beans.CatTag;
 import com.csetutorials.ssj.beans.Page;
 import com.csetutorials.ssj.beans.SiteConfig;
-import com.csetutorials.ssj.contants.Paths;
+import com.csetutorials.ssj.contants.PathService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.util.*;
 
-public class PageUtils {
+@Service
+public class PageService {
 
-	public static List<Page> createPostsMetaData(SiteConfig siteConfig) throws Exception {
+	@Autowired
+	PathService pathService;
+
+	public List<Page> createPostsMetaData(SiteConfig siteConfig) throws Exception {
 		List<Page> posts = new ArrayList<>();
 
 		Map<String, CatTag> tagsMap = new HashMap<>();
 		Map<String, CatTag> categoriesMap = new HashMap<>();
 		Map<String, Author> authorsMap = new HashMap<>();
 
-		List<File> files = FileUtils.getFilesRecursively(Paths.getPostsDir());
+		List<File> files = FileUtils.getFilesRecursively(pathService.getPostsDir());
 		for (File file : files) {
 			Page post = getPageInfo(file, siteConfig, tagsMap, categoriesMap, authorsMap, true);
 			if (post != null) {
@@ -55,12 +61,12 @@ public class PageUtils {
 		return posts;
 	}
 
-	public static List<Page> createPagesMetaData(SiteConfig siteConfig) throws Exception {
+	public List<Page> createPagesMetaData(SiteConfig siteConfig) throws Exception {
 		List<Page> pages = new ArrayList<>();
 
 		Map<String, Author> authorsMap = new HashMap<>();
 
-		for (File file : FileUtils.getFilesRecursively(Paths.getPagesDir())) {
+		for (File file : FileUtils.getFilesRecursively(pathService.getPagesDir())) {
 			pages.add(getPageInfo(file, siteConfig, null, null, authorsMap, false));
 		}
 		siteConfig.setPages(pages);
@@ -68,7 +74,7 @@ public class PageUtils {
 		return pages;
 	}
 
-	private static Page getPageInfo(File file, SiteConfig siteConfig, Map<String, CatTag> tagsMap,
+	private Page getPageInfo(File file, SiteConfig siteConfig, Map<String, CatTag> tagsMap,
 			Map<String, CatTag> categoriesMap, Map<String, Author> authorsMap, boolean isPost) throws Exception {
 		String fileContent = FileUtils.getString(file);
 		Map<String, Object> rawParams = StringUtils.getRawParams(fileContent);
@@ -162,7 +168,7 @@ public class PageUtils {
 		return page;
 	}
 
-	private static List<CatTag> createTags(Map<String, CatTag> tagsMap, SiteConfig siteConfig, List<String> sTagsList) {
+	private List<CatTag> createTags(Map<String, CatTag> tagsMap, SiteConfig siteConfig, List<String> sTagsList) {
 		List<CatTag> tags = new ArrayList<>();
 		if (sTagsList == null) {
 			return tags;
@@ -184,7 +190,7 @@ public class PageUtils {
 		return tags;
 	}
 
-	private static List<CatTag> createCategories(Map<String, CatTag> catsMap, SiteConfig siteConfig,
+	private List<CatTag> createCategories(Map<String, CatTag> catsMap, SiteConfig siteConfig,
 			List<String> sCatList) {
 		List<CatTag> categories = new ArrayList<>();
 		if (sCatList == null) {
@@ -209,17 +215,17 @@ public class PageUtils {
 		return categories;
 	}
 
-	private static String createUrl(SiteConfig siteConfig, String postPermalink) {
+	private String createUrl(SiteConfig siteConfig, String postPermalink) {
 		return StringUtils.removeExtraSlash(siteConfig.getBaseUrl() + "/" + postPermalink);
 	}
 
-	private static String formatPermalink(Page page, String permalink) {
+	private String formatPermalink(Page page, String permalink) {
 		String slug = page.getSlug();
 		// TODO : Added more
 		return permalink.replaceAll(":slug", slug).replaceAll("/+", "/");
 	}
 
-	public static List<CatTag> extractCategories(List<Page> pages) {
+	public List<CatTag> extractCategories(List<Page> pages) {
 		Set<CatTag> categories = new HashSet<>();
 		for (Page postInfo : pages) {
 			categories.addAll(postInfo.getCategories());
@@ -229,7 +235,7 @@ public class PageUtils {
 		return list;
 	}
 
-	public static List<CatTag> extractTags(List<Page> pages) {
+	public List<CatTag> extractTags(List<Page> pages) {
 		Set<CatTag> tags = new HashSet<>();
 		for (Page postInfo : pages) {
 			tags.addAll(postInfo.getTags());
@@ -237,7 +243,7 @@ public class PageUtils {
 		return new ArrayList<>(tags);
 	}
 
-	public static Map<CatTag, List<Page>> extractCategoriesWithRelatedPosts(List<Page> postsMeta) {
+	public Map<CatTag, List<Page>> extractCategoriesWithRelatedPosts(List<Page> postsMeta) {
 		Map<CatTag, List<Page>> catWithPosts = new HashMap<>();
 		for (Page postInfo : postsMeta) {
 			for (CatTag cat : postInfo.getCategories()) {
@@ -248,7 +254,7 @@ public class PageUtils {
 		return catWithPosts;
 	}
 
-	public static Map<CatTag, List<Page>> extractTagsWithRelatedPosts(List<Page> postsMeta) {
+	public Map<CatTag, List<Page>> extractTagsWithRelatedPosts(List<Page> postsMeta) {
 		Map<CatTag, List<Page>> tagWithPosts = new HashMap<>();
 		for (Page postInfo : postsMeta) {
 			List<CatTag> list = postInfo.getTags();
@@ -263,7 +269,7 @@ public class PageUtils {
 		return tagWithPosts;
 	}
 
-	public static Map<String, List<Page>> extractAuthorWithRelatedPosts(List<Page> postsMeta) {
+	public Map<String, List<Page>> extractAuthorWithRelatedPosts(List<Page> postsMeta) {
 		Map<String, List<Page>> authorWithPostsMap = new HashMap<>();
 		for (Page postInfo : postsMeta) {
 			String author = postInfo.getAuthor().getUsername();

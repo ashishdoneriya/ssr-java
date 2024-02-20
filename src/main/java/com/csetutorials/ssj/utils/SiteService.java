@@ -2,7 +2,7 @@ package com.csetutorials.ssj.utils;
 
 import com.csetutorials.ssj.beans.*;
 import com.csetutorials.ssj.contants.Layouts;
-import com.csetutorials.ssj.contants.Paths;
+import com.csetutorials.ssj.contants.PathService;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import org.apache.velocity.Template;
@@ -19,6 +19,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -28,10 +30,16 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.Map.Entry;
 
-public class SiteUtils {
+@Service
+public class SiteService {
 
-	public static SiteConfig getSiteConfig() throws JsonSyntaxException, IOException {
-		String json = FileUtils.getString(Paths.getSiteConfigDir());
+	@Autowired
+	PathService pathService;
+	@Autowired
+	TemplateService templateService;
+
+	public SiteConfig getSiteConfig() throws JsonSyntaxException, IOException {
+		String json = FileUtils.getString(pathService.getSiteConfigDir());
 		Type type = new TypeToken<Map<String, Object>>() {
 		}.getType();
 		Map<String, Object> rawConfig = Constants.gson.fromJson(json, type);
@@ -41,7 +49,7 @@ public class SiteUtils {
 		return config;
 	}
 
-	private static String getActiveThemeDir(SiteConfig config) {
+	private String getActiveThemeDir(SiteConfig config) {
 		String activeTheme = config.getTheme();
 		if (activeTheme != null) {
 
@@ -58,7 +66,7 @@ public class SiteUtils {
 				}
 				String themeName = repo.substring(repo.lastIndexOf("/") + 1);
 				repo = repo + ".git";
-				File dir = new File(StringUtils.removeExtraSlash(Paths.getThemesDir() + File.separator + themeName));
+				File dir = new File(StringUtils.removeExtraSlash(pathService.getThemesDir() + File.separator + themeName));
 				if (dir.exists() && dir.isDirectory() && dir.list().length != 0) {
 					return dir.getAbsolutePath();
 				} else {
@@ -91,7 +99,7 @@ public class SiteUtils {
 					return dir.getAbsolutePath();
 				}
 			} else {
-				File dir = new File(StringUtils.removeExtraSlash(Paths.getThemesDir() + File.separator + activeTheme));
+				File dir = new File(StringUtils.removeExtraSlash(pathService.getThemesDir() + File.separator + activeTheme));
 				if (dir.exists() && dir.isDirectory()) {
 					return dir.getAbsolutePath();
 				} else {
@@ -101,7 +109,7 @@ public class SiteUtils {
 			}
 
 		}
-		File dir = new File(Paths.getThemesDir());
+		File dir = new File(pathService.getThemesDir());
 		if (!dir.exists() || !dir.isDirectory() || dir.list().length == 0) {
 			System.out.println("No theme found");
 			System.exit(1);
@@ -114,7 +122,7 @@ public class SiteUtils {
 		return themes[0].getAbsolutePath();
 	}
 
-	private static Map<String, Object> createMap(Page page) throws IOException {
+	private Map<String, Object> createMap(Page page) {
 		Map<String, Object> map = new HashMap<>();
 		for (Entry<String, Object> e : page.getRawParams().entrySet()) {
 			map.put(e.getKey(), e.getValue());
@@ -135,8 +143,8 @@ public class SiteUtils {
 		return map;
 	}
 
-	public static void generateLatestPostsPages(SiteConfig siteConfig) throws FileNotFoundException {
-		if (!TemplateUtils.isTemplateAvailable(siteConfig, Layouts.latestPosts)) {
+	public void generateLatestPostsPages(SiteConfig siteConfig) throws FileNotFoundException {
+		if (!templateService.isTemplateAvailable(siteConfig, Layouts.latestPosts)) {
 			return;
 		}
 
@@ -175,19 +183,19 @@ public class SiteUtils {
 				previousPageUrl = StringUtils.removeExtraSlash(previousPageUrl);
 				paginator.setPreviousPageUrl(previousPageUrl);
 			}
-			String currentPageFilePath = Paths.getGeneratedHtmlDir() + File.separator + siteConfig.getBaseUrl()
+			String currentPageFilePath = pathService.getGeneratedHtmlDir() + File.separator + siteConfig.getBaseUrl()
 					+ File.separator + siteConfig.getLatestPostsBase() + File.separator
 					+ (i == 1 ? "index.html" : "/page" + File.separator + i + File.separator + "index.html");
 			context.put("paginator", paginator);
-			String pageLayoutContent = TemplateUtils.formatContent(engine, context, siteConfig.getLatestPostsLayout());
+			String pageLayoutContent = templateService.formatContent(engine, context, siteConfig.getLatestPostsLayout());
 			pageLayoutContent = Jsoup.parse(pageLayoutContent).toString();
 			FileUtils.write(currentPageFilePath, pageLayoutContent);
 		}
 	}
 
-	public static void generateCategoriesPages(SiteConfig siteConfig, Map<CatTag, List<Page>> catsWithRelatedPosts)
+	public void generateCategoriesPages(SiteConfig siteConfig, Map<CatTag, List<Page>> catsWithRelatedPosts)
 			throws FileNotFoundException {
-		if (!TemplateUtils.isTemplateAvailable(siteConfig, Layouts.category)) {
+		if (!templateService.isTemplateAvailable(siteConfig, Layouts.category)) {
 			return;
 		}
 
@@ -229,13 +237,13 @@ public class SiteUtils {
 					previousPageUrl = StringUtils.removeExtraSlash(previousPageUrl);
 					paginator.setPreviousPageUrl(previousPageUrl);
 				}
-				String currentPageFilePath = Paths.getGeneratedHtmlDir() + File.separator + siteConfig.getBaseUrl()
+				String currentPageFilePath = pathService.getGeneratedHtmlDir() + File.separator + siteConfig.getBaseUrl()
 						+ File.separator + siteConfig.getCategoryBase() + File.separator + cat.getShortcode()
 						+ File.separator
 						+ (i == 1 ? "index.html" : "/page" + File.separator + i + File.separator + "index.html");
 				context.put("paginator", paginator);
 				context.put("category", cat);
-				String pageLayoutContent = TemplateUtils.formatContent(engine, context,
+				String pageLayoutContent = templateService.formatContent(engine, context,
 						siteConfig.getCategoriesLayout());
 				pageLayoutContent = Jsoup.parse(pageLayoutContent).toString();
 				FileUtils.write(currentPageFilePath, pageLayoutContent);
@@ -243,9 +251,9 @@ public class SiteUtils {
 		}
 	}
 
-	public static void generateTagsPages(SiteConfig siteConfig, Map<CatTag, List<Page>> tagsWithRelatedPosts)
+	public void generateTagsPages(SiteConfig siteConfig, Map<CatTag, List<Page>> tagsWithRelatedPosts)
 			throws FileNotFoundException {
-		if (!TemplateUtils.isTemplateAvailable(siteConfig, Layouts.tag)) {
+		if (!templateService.isTemplateAvailable(siteConfig, Layouts.tag)) {
 			return;
 		}
 
@@ -286,19 +294,19 @@ public class SiteUtils {
 					previousPageUrl = StringUtils.removeExtraSlash(previousPageUrl);
 					paginator.setPreviousPageUrl(previousPageUrl);
 				}
-				String currentPageFilePath = Paths.getGeneratedHtmlDir() + File.separator + siteConfig.getBaseUrl()
+				String currentPageFilePath = pathService.getGeneratedHtmlDir() + File.separator + siteConfig.getBaseUrl()
 						+ File.separator + siteConfig.getTagBase() + File.separator + tag.getName() + File.separator
 						+ (i == 1 ? "index.html" : "/page" + File.separator + i + File.separator + "index.html");
 				context.put("paginator", paginator);
 				context.put("tag", tag);
-				String pageLayoutContent = TemplateUtils.formatContent(engine, context, siteConfig.getTagsLayout());
+				String pageLayoutContent = templateService.formatContent(engine, context, siteConfig.getTagsLayout());
 				pageLayoutContent = Jsoup.parse(pageLayoutContent).toString();
 				FileUtils.write(currentPageFilePath, pageLayoutContent);
 			}
 		}
 	}
 
-	private static List<Page> getSublist(List<Page> list, int pageNumber, int maxPosts) {
+	private List<Page> getSublist(List<Page> list, int pageNumber, int maxPosts) {
 		List<Page> sub = new ArrayList<>();
 		int i = (pageNumber - 1) * maxPosts;
 		while (i < list.size() && sub.size() < maxPosts) {
@@ -307,7 +315,7 @@ public class SiteUtils {
 		return sub;
 	}
 
-	public static void generatePosts(List<Page> pages, SiteConfig siteConfig, boolean isPost) throws IOException {
+	public void generatePosts(List<Page> pages, SiteConfig siteConfig, boolean isPost) throws IOException {
 		VelocityContext context = new VelocityContext();
 		VelocityEngine engine = siteConfig.getVelocityEngine();
 		context.put("site", siteConfig.getRawConfig());
@@ -316,7 +324,7 @@ public class SiteUtils {
 		context.put("dateUtils", new DateUtils());
 		context.put("StringUtils", StringUtils.class);
 		final String metaTagsFormat = FileUtils.getResourceContent("post-meta-tags.html");
-		TemplateUtils.addTemplate(siteConfig, "ssj-meta-tags", metaTagsFormat);
+		templateService.addTemplate(siteConfig, "ssj-meta-tags", metaTagsFormat);
 		for (Page page : pages) {
 			if (page.isDraft()) {
 				continue;
@@ -325,26 +333,26 @@ public class SiteUtils {
 			context.put("page", map);
 			String content = StringUtils.getContentBody(FileUtils.getString(page.getFile()));
 			if (page.getFile().getName().endsWith(".md") || page.getFile().getName().endsWith(".markdown")) {
-				content = TemplateUtils.parseMarkdown(content);
+				content = templateService.parseMarkdown(content);
 			}
-			TemplateUtils.addTemplate(siteConfig, "test-template-ssr", content);
-			content = TemplateUtils.formatContent(engine, context, "test-template-ssr");
+			templateService.addTemplate(siteConfig, "test-template-ssr", content);
+			content = templateService.formatContent(engine, context, "test-template-ssr");
 			List<Image> images = extractImages(siteConfig, content);
 			content = formatAnchorTags(siteConfig, content);
 			page.setImages(images);
 
 			map.put("content", content);
 			context.put("page", map);
-			final String metaTags = TemplateUtils.formatContent(engine, context, "ssj-meta-tags");
+			final String metaTags = templateService.formatContent(engine, context, "ssj-meta-tags");
 			context.put("seoSettings", metaTags);
-			String postLayoutContent = TemplateUtils.formatContent(engine, context, page.getLayout());
+			String postLayoutContent = templateService.formatContent(engine, context, page.getLayout());
 			postLayoutContent = Jsoup.parse(postLayoutContent).toString();
 			write(page.getPermalink(), postLayoutContent, siteConfig,
 					isPost ? siteConfig.isPostUglyUrlEnabled() : siteConfig.isPageUglyUrlEnabled());
 		}
 	}
 
-	private static List<Image> extractImages(SiteConfig siteConfig, String content) {
+	private List<Image> extractImages(SiteConfig siteConfig, String content) {
 		Document doc = Jsoup.parse(content);
 		Elements imageElements = doc.select("img");
 		List<Image> images = new ArrayList<>(1);
@@ -375,7 +383,7 @@ public class SiteUtils {
 		return images;
 	}
 	
-	private static String formatAnchorTags(SiteConfig siteConfig, String content) {
+	private String formatAnchorTags(SiteConfig siteConfig, String content) {
 		Document doc = Jsoup.parse(content);
 		Elements anchorTags = doc.select("a");
 		for (Element imageEle : anchorTags) {
@@ -389,20 +397,20 @@ public class SiteUtils {
 		return doc.toString();
 	}
 
-	public static void write(String permalink, String content, SiteConfig siteConfig, boolean uglyUrl)
+	public void write(String permalink, String content, SiteConfig siteConfig, boolean uglyUrl)
 			throws FileNotFoundException {
 		permalink = "/" + permalink + (uglyUrl ? "" : "/index.html");
-		String path = Paths.getGeneratedHtmlDir() + permalink;
+		String path = pathService.getGeneratedHtmlDir() + permalink;
 		path = path.replaceAll("/+", "/").replaceAll("/", File.separator);
 		File file = new File(path);
 		file.getParentFile().mkdirs();
 		FileUtils.write(file.getAbsolutePath(), content);
 	}
 
-	public static void writePost(String postPermalink, String postContent, SiteConfig siteConfig)
+	public void writePost(String postPermalink, String postContent, SiteConfig siteConfig)
 			throws FileNotFoundException {
 		postPermalink = "/" + postPermalink + (siteConfig.isPostUglyUrlEnabled() ? "" : "/index.html");
-		String path = Paths.getGeneratedHtmlDir() + postPermalink;
+		String path = pathService.getGeneratedHtmlDir() + postPermalink;
 		path = path.replaceAll("/+", "/").replaceAll("/", File.separator);
 		File file = new File(path);
 		file.getParentFile().mkdirs();
@@ -434,9 +442,9 @@ public class SiteUtils {
 		return writer.toString();
 	}
 
-	public static void generateAuthorsPages(SiteConfig siteConfig, Map<String, List<Page>> authorsPostsMap)
+	public void generateAuthorsPages(SiteConfig siteConfig, Map<String, List<Page>> authorsPostsMap)
 			throws FileNotFoundException {
-		if (!TemplateUtils.isTemplateAvailable(siteConfig, Layouts.author)) {
+		if (!templateService.isTemplateAvailable(siteConfig, Layouts.author)) {
 			return;
 		}
 
@@ -476,12 +484,12 @@ public class SiteUtils {
 					previousPageUrl = StringUtils.removeExtraSlash(previousPageUrl);
 					paginator.setPreviousPageUrl(previousPageUrl);
 				}
-				String currentPageFilePath = Paths.getGeneratedHtmlDir() + File.separator + siteConfig.getBaseUrl()
+				String currentPageFilePath = pathService.getGeneratedHtmlDir() + File.separator + siteConfig.getBaseUrl()
 						+ File.separator + siteConfig.getAuthorBase() + File.separator + authorName + File.separator
 						+ (i == 1 ? "index.html" : "/page" + File.separator + i + File.separator + "index.html");
 				context.put("paginator", paginator);
 				context.put("author", list.get(0).getAuthor());
-				String pageLayoutContent = TemplateUtils.formatContent(engine, context, siteConfig.getAuthorLayout());
+				String pageLayoutContent = templateService.formatContent(engine, context, siteConfig.getAuthorLayout());
 				pageLayoutContent = Jsoup.parse(pageLayoutContent).toString();
 				FileUtils.write(currentPageFilePath, pageLayoutContent);
 			}

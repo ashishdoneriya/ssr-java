@@ -3,18 +3,24 @@ package com.csetutorials.ssj.utils;
 import com.csetutorials.ssj.beans.Author;
 import com.csetutorials.ssj.beans.SiteConfig;
 import com.csetutorials.ssj.beans.SocialMediaLinks;
-import com.csetutorials.ssj.contants.Paths;
+import com.csetutorials.ssj.contants.PathService;
 import com.google.gson.JsonSyntaxException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DataUtils {
+@Service
+public class DataService {
 
-	public static void readData(SiteConfig siteConfig) throws JsonSyntaxException, IOException {
-		File dataDir = new File(Paths.getDataDir());
+	@Autowired
+	PathService pathService;
+
+	public void readData(SiteConfig siteConfig) throws JsonSyntaxException, IOException {
+		File dataDir = new File(pathService.getDataDir());
 		Map<String, Object> map = new HashMap<>();
 		if (!dataDir.exists() || dataDir.list().length == 0) {
 			siteConfig.setData(new HashMap<String, Object>(1));
@@ -35,11 +41,11 @@ public class DataUtils {
 		siteConfig.setData(map);
 	}
 
-	private static Object getObject(File file) throws JsonSyntaxException, IOException {
+	private Object getObject(File file) throws JsonSyntaxException, IOException {
 		return Constants.gson.fromJson(FileUtils.getString(file.getAbsolutePath()), Object.class);
 	}
 
-	private static Object readDir(File dir) throws JsonSyntaxException, IOException {
+	private Object readDir(File dir) throws JsonSyntaxException, IOException {
 		Map<String, Object> map = new HashMap<>();
 		if (!dir.exists() || dir.list().length == 0) {
 			return map;
@@ -58,8 +64,8 @@ public class DataUtils {
 		return map;
 	}
 
-	public static void loadAllAuthors(SiteConfig siteConfig) throws IOException {
-		File authorsDir = new File(Paths.getAuthorsDir());
+	public void loadAllAuthors(SiteConfig siteConfig) throws IOException {
+		File authorsDir = new File(pathService.getAuthorsDir());
 		Map<String, Author> authors = new HashMap<>();
 		for (File authorFile : authorsDir.listFiles()) {
 			String content;

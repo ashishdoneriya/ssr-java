@@ -2,26 +2,34 @@ package com.csetutorials.ssj.utils;
 
 import com.csetutorials.ssj.beans.Page;
 import com.csetutorials.ssj.beans.SiteConfig;
-import com.csetutorials.ssj.contants.Paths;
+import com.csetutorials.ssj.contants.PathService;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
+@Service
 public class SitemapCreator {
 
-	public static void createSiteMap(SiteConfig siteConfig, List<Page> posts, List<Page> pages) throws IOException {
-		String currentPageFilePath = Paths.getGeneratedHtmlDir() + File.separator + "main-sitemap.xsl";
+	@Autowired
+	PathService pathService;
+	@Autowired
+	TemplateService templateService;
+
+	public void createSiteMap(SiteConfig siteConfig, List<Page> posts, List<Page> pages) throws IOException {
+		String currentPageFilePath = pathService.getGeneratedHtmlDir() + File.separator + "main-sitemap.xsl";
 		FileUtils.write(currentPageFilePath, FileUtils.getResourceContent("main-sitemap.xsl"));
 		Date postsLastUpdated = createPageSiteMap(siteConfig, posts, true);
 		Date pagesLastUpdated = createPageSiteMap(siteConfig, pages, false);
 		createIndex(siteConfig, postsLastUpdated, pagesLastUpdated);
 	}
 
-	private static void createIndex(SiteConfig siteConfig, Date postsLastUpdated, Date pagesLastUpdated)
+	private void createIndex(SiteConfig siteConfig, Date postsLastUpdated, Date pagesLastUpdated)
 			throws FileNotFoundException {
 		String xslPath = StringUtils.removeExtraSlash(siteConfig.getUrl() + siteConfig.getBaseUrl())
 				+ "/main-sitemap.xsl";
@@ -48,13 +56,13 @@ public class SitemapCreator {
 		context.put("xslPath", xslPath);
 		context.put("siteMaps", siteMaps);
 
-		String content = TemplateUtils.formatContent(engine, context, "sitemap_index.xml");
+		String content = templateService.formatContent(engine, context, "sitemap_index.xml");
 
-		String currentPageFilePath = Paths.getGeneratedHtmlDir() + File.separator + "sitemap_index.xml";
+		String currentPageFilePath = pathService.getGeneratedHtmlDir() + File.separator + "sitemap_index.xml";
 		FileUtils.write(currentPageFilePath, content);
 	}
 
-	private static Date createPageSiteMap(SiteConfig siteConfig, List<Page> pages, boolean arePosts)
+	private Date createPageSiteMap(SiteConfig siteConfig, List<Page> pages, boolean arePosts)
 			throws FileNotFoundException {
 
 		String xslPath = StringUtils.removeExtraSlash(siteConfig.getUrl() + siteConfig.getBaseUrl())
@@ -76,15 +84,15 @@ public class SitemapCreator {
 		context.put("websiteUpdated", DateUtils.getSiteMapString(lastUpdated));
 		context.put("posts", pages);
 
-		String content = TemplateUtils.formatContent(engine, context, "page-sitemap.xml");
+		String content = templateService.formatContent(engine, context, "page-sitemap.xml");
 
-		String currentPageFilePath = Paths.getGeneratedHtmlDir() + File.separator
+		String currentPageFilePath = pathService.getGeneratedHtmlDir() + File.separator
 				+ (arePosts ? "post-sitemap.xml" : "page-sitemap.xml");
 		FileUtils.write(currentPageFilePath, content);
 		return lastUpdated;
 	}
 
-	private static Date getLastUpdated(List<Page> pages) {
+	private Date getLastUpdated(List<Page> pages) {
 		Date date = null;
 		for (Page page : pages) {
 			if (date == null || date.getTime() > page.getUpdated().getTime()) {
