@@ -70,7 +70,7 @@ public class SitemapCreator {
 		String xslPath = StringUtils.removeExtraSlash(siteConfig.getUrl() + siteConfig.getBaseUrl())
 				+ "/main-sitemap.xsl";
 
-		String websiteUrl = null;
+		String websiteUrl;
 		if (arePosts) {
 			websiteUrl = StringUtils.removeExtraSlash(siteConfig.getUrl() + "/" + siteConfig.getLatestPostsBase());
 		} else {

@@ -4,7 +4,6 @@ import com.csetutorials.ssj.beans.Author;
 import com.csetutorials.ssj.beans.SiteConfig;
 import com.csetutorials.ssj.beans.SocialMediaLinks;
 import com.csetutorials.ssj.contants.PathService;
-import com.google.gson.JsonSyntaxException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,16 +19,12 @@ public class DataService {
 	PathService pathService;
 	@Autowired
 	FileService fileService;
+	@Autowired
+	JsonService jsonService;
 
-	public void readData(SiteConfig siteConfig) throws JsonSyntaxException, IOException {
-		File dataDir = new File(pathService.getDataDir());
+	public void readData(SiteConfig siteConfig) throws IOException {
 		Map<String, Object> map = new HashMap<>();
-		if (!dataDir.exists() || dataDir.list().length == 0) {
-			siteConfig.setData(new HashMap<String, Object>(1));
-			return;
-		}
-
-		for (File file : dataDir.listFiles()) {
+		for (File file : fileService.listFiles(pathService.getDataDir())) {
 			if (file.isFile()) {
 				String name = file.getName();
 				if (name.endsWith(".json")) {
@@ -43,16 +38,13 @@ public class DataService {
 		siteConfig.setData(map);
 	}
 
-	private Object getObject(File file) throws JsonSyntaxException, IOException {
-		return Constants.gson.fromJson(fileService.getString(file.getAbsolutePath()), Object.class);
+	private Object getObject(File file) throws IOException {
+		return jsonService.convert(fileService.getString(file), Object.class);
 	}
 
-	private Object readDir(File dir) throws JsonSyntaxException, IOException {
+	private Object readDir(File dir) throws IOException {
 		Map<String, Object> map = new HashMap<>();
-		if (!dir.exists() || dir.list().length == 0) {
-			return map;
-		}
-		for (File file : dir.listFiles()) {
+		for (File file : fileService.listFiles(dir)) {
 			if (file.isFile()) {
 				String name = file.getName();
 				if (name.endsWith(".json")) {
@@ -67,17 +59,15 @@ public class DataService {
 	}
 
 	public void loadAllAuthors(SiteConfig siteConfig) throws IOException {
-		File authorsDir = new File(pathService.getAuthorsDir());
 		Map<String, Author> authors = new HashMap<>();
-		for (File authorFile : authorsDir.listFiles()) {
+		for (File authorFile : fileService.listFiles(pathService.getAuthorsDir())) {
 			String content;
 			try {
 				content = fileService.getString(authorFile);
 			} catch (IOException e) {
 				throw new IOException("Problem while reading the file - " + authorFile.getAbsolutePath(), e);
 			}
-			Author authorObj = Constants.gson.fromJson(content, Author.class);
-
+			Author authorObj = jsonService.convert(content, Author.class);
 			String username = authorFile.getName().replace(".json", "");
 			authors.put(username, authorObj);
 			String url = siteConfig.getBaseUrl() + "/" + siteConfig.getAuthorBase() + "/" + username;

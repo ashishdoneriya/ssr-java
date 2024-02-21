@@ -31,6 +31,8 @@ public class Main {
 	SitemapCreator sitemapCreator;
 	@Autowired
 	FileService fileService;
+	@Autowired
+	JsonService jsonService;
 
 	public void main(String[] args) throws Exception {
 
@@ -135,12 +137,12 @@ public class Main {
 		createAuthor(websiteDirPath, username, author);
 		config.setDefaultAuthor(username);
 		kb.close();
-		fileService.write(websiteDirPath + File.separator + "ssj.json", Constants.prettyGson.toJson(config));
+		fileService.write(websiteDirPath + File.separator + "ssj.json", jsonService.pretty(config));
 	}
 
 	private void createAuthor(String websiteDirPath, String username, Author author)
 			throws FileNotFoundException {
-		String json = Constants.prettyGson.toJson(author);
+		String json = jsonService.pretty(author);
 		String path = websiteDirPath + File.separator + "data" + File.separator + "authors" + File.separator + username
 				+ ".json";
 		fileService.write(path, json);
@@ -209,11 +211,6 @@ public class Main {
 			System.exit(0);
 		}
 		return cmd;
-	}
-
-	public void generateSampleConfig() {
-		System.out.println(Constants.prettyGson.toJson(new SiteConfig()));
-		System.exit(0);
 	}
 
 	private Options buildOptions() {

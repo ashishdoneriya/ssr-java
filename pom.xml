@@ -44,12 +44,14 @@
 			<version>1.18.30</version>
 			<scope>provided</scope>
 		</dependency>
-		<!-- Google gson library for handling json -->
 		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+		</dependency>
 		<!-- Commonmark library for converting markdown to html -->
 		<dependency>
 			<groupId>com.atlassian.commonmark</groupId>

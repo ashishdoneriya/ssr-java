@@ -7,6 +7,7 @@ import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 
@@ -20,7 +21,7 @@ public class FileService {
 	public String getString(File file) throws IOException {
 		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 			StringBuilder stringBuilder = new StringBuilder();
-			String line = null;
+			String line;
 			while ((line = reader.readLine()) != null) {
 				stringBuilder.append(line);
 				stringBuilder.append('\n');
@@ -46,7 +47,7 @@ public class FileService {
 
 	public List<File> getFilesRecursively(String dirPath) {
 		File dir = new File(dirPath);
-		if (!dir.exists() || dir.list().length == 0) {
+		if (listFiles(dir).isEmpty()) {
 			return new ArrayList<>(1);
 		}
 		Stack<File> stack = new Stack<>();
@@ -57,7 +58,7 @@ public class FileService {
 			if (file.isFile()) {
 				list.add(file);
 			} else if (file.isDirectory()) {
-				for (File temp : file.listFiles()) {
+				for (File temp : listFiles(file)) {
 					stack.push(temp);
 				}
 			}
@@ -99,11 +100,27 @@ public class FileService {
 
 	public void deleteDir(File dir) throws IOException {
 		if (dir.isDirectory()) {
-			for (File file : dir.listFiles())
+			for (File file : listFiles(dir))
 				deleteDir(file);
 		}
 		if (!dir.delete())
 			throw new FileNotFoundException("Failed to delete file: " + dir);
+	}
+
+	public List<File> listFiles(String dirPath) {
+		return listFiles(new File(dirPath));
+	}
+
+	public List<File> listFiles(File dir) {
+		List<File> list = new ArrayList<>(1);
+		if (dir == null || !dir.exists() || !dir.isDirectory()) {
+			return list;
+		}
+		File[] files = dir.listFiles();
+		if (files == null) {
+			return list;
+		}
+		return Arrays.asList(files);
 	}
 
 }

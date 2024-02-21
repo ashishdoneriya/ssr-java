@@ -3,8 +3,8 @@ package com.csetutorials.ssj.services;
 import com.csetutorials.ssj.beans.*;
 import com.csetutorials.ssj.contants.Layouts;
 import com.csetutorials.ssj.contants.PathService;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
@@ -26,7 +26,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.lang.reflect.Type;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -39,13 +38,14 @@ public class SiteService {
 	TemplateService templateService;
 	@Autowired
 	FileService fileService;
+	@Autowired
+	JsonService jsonService;
 
-	public SiteConfig getSiteConfig() throws JsonSyntaxException, IOException {
+	public SiteConfig getSiteConfig() throws IOException {
 		String json = fileService.getString(pathService.getSiteConfigDir());
-		Type type = new TypeToken<Map<String, Object>>() {
-		}.getType();
-		Map<String, Object> rawConfig = Constants.gson.fromJson(json, type);
-		SiteConfig config = Constants.gson.fromJson(json, SiteConfig.class);
+		TypeReference<Map<String, Object>> type = new TypeReference<>(){};
+		Map<String, Object> rawConfig = (new ObjectMapper()).readValue(json, type);
+		SiteConfig config = jsonService.convert(json, SiteConfig.class);
 		config.setRawConfig(rawConfig);
 		config.setActiveThemeDir(getActiveThemeDir(config));
 		return config;
@@ -69,7 +69,7 @@ public class SiteService {
 				String themeName = repo.substring(repo.lastIndexOf("/") + 1);
 				repo = repo + ".git";
 				File dir = new File(StringUtils.removeExtraSlash(pathService.getThemesDir() + File.separator + themeName));
-				if (dir.exists() && dir.isDirectory() && dir.list().length != 0) {
+				if (!fileService.listFiles(dir).isEmpty()) {
 					return dir.getAbsolutePath();
 				} else {
 					Collection<Ref> remoteRefs = null;
@@ -94,7 +94,6 @@ public class SiteService {
 
 					try (Git result = Git.cloneRepository().setURI(repo).setDirectory(dir).setBranch(ref.getName())
 							.call()) {
-
 					} catch (Exception e) {
 						System.out.println("Problem while cloning theme from [" + repo + "]");
 					}
@@ -126,9 +125,7 @@ public class SiteService {
 
 	private Map<String, Object> createMap(Page page) {
 		Map<String, Object> map = new HashMap<>();
-		for (Entry<String, Object> e : page.getRawParams().entrySet()) {
-			map.put(e.getKey(), e.getValue());
-		}
+		map.putAll(page.getRawParams());
 		map.put("title", page.getTitle());
 		map.put("layout", page.getLayout());
 		map.put("slug", page.getSlug());

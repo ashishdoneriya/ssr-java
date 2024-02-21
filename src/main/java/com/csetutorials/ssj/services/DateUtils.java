@@ -6,8 +6,6 @@ import java.util.Date;
 
 public class DateUtils {
 
-	public static String postWritingDataFormat = "yyyy-MM-dd'T'HH:mm:ssXXX";
-
 	public static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
 
 	public static synchronized Date parse(String sDate, String pattern) throws ParseException {
