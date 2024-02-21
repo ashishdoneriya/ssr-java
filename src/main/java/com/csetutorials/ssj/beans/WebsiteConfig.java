@@ -1,6 +1,7 @@
 package com.csetutorials.ssj.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.velocity.app.VelocityEngine;
@@ -10,8 +11,8 @@ import java.util.Map;
 
 @Getter
 @Setter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class WebsiteConfig {
-
 	private String title;
 	private String baseUrl;
 	private String tagline;

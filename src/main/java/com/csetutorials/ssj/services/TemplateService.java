@@ -3,7 +3,6 @@ package com.csetutorials.ssj.services;
 import com.csetutorials.ssj.beans.WebsiteConfig;
 import com.csetutorials.ssj.contants.DefaultDirs;
 import com.csetutorials.ssj.contants.PathService;
-import lombok.Setter;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
@@ -17,6 +16,7 @@ import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.StringWriter;
@@ -24,7 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-@Setter
+@Service
 public class TemplateService {
 
 	@Autowired

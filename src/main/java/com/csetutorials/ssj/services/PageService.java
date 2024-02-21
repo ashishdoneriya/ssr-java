@@ -220,8 +220,10 @@ public class PageService {
 
 	private String formatPermalink(Page page, String permalink) {
 		String slug = page.getSlug();
-		// TODO : Added more
-		return permalink.replaceAll(":slug", slug).replaceAll("/+", "/");
+		return permalink
+				.replaceAll(":slug", slug)
+				.replace(":category", page.getCategories().getFirst().getShortcode())
+				.replaceAll("/+", "/");
 	}
 
 	public List<CatTag> extractCategories(List<Page> pages) {
