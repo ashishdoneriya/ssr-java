@@ -1,30 +1,23 @@
-package com.csetutorials.ssj.utils;
+package com.csetutorials.ssj.services;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import com.csetutorials.ssj.Main;
+import org.springframework.stereotype.Service;
+
+import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import com.csetutorials.ssj.Main;
+@Service
+public class FileService {
 
-public class FileUtils {
-
-	public static String getString(String path) throws IOException {
+	public String getString(String path) throws IOException {
 		return getString(new File(path));
 	}
 
-	public static String getString(File file) throws IOException {
+	public String getString(File file) throws IOException {
 		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 			StringBuilder stringBuilder = new StringBuilder();
 			String line = null;
@@ -42,7 +35,7 @@ public class FileUtils {
 		}
 	}
 
-	public static void write(String path, String content) throws FileNotFoundException {
+	public void write(String path, String content) throws FileNotFoundException {
 		File file = new File(path);
 		file.getParentFile().mkdirs();
 		try (PrintWriter out = new PrintWriter(file)) {
@@ -51,7 +44,7 @@ public class FileUtils {
 		}
 	}
 
-	public static List<File> getFilesRecursively(String dirPath) {
+	public List<File> getFilesRecursively(String dirPath) {
 		File dir = new File(dirPath);
 		if (!dir.exists() || dir.list().length == 0) {
 			return new ArrayList<>(1);
@@ -72,7 +65,7 @@ public class FileUtils {
 		return list;
 	}
 
-	public static void copyDirRecursively(String srcDirPath, String destPath) throws IOException {
+	public void copyDirRecursively(String srcDirPath, String destPath) throws IOException {
 		List<File> files = getFilesRecursively(srcDirPath);
 		Path pathBase = Paths.get(srcDirPath);
 		for (File srcFile : files) {
@@ -86,7 +79,7 @@ public class FileUtils {
 		}
 	}
 
-	public static void copyFile(File source, File dest) throws IOException {
+	public void copyFile(File source, File dest) throws IOException {
 		dest.getParentFile().mkdirs();
 		if (dest.exists()) {
 			dest.delete();
@@ -100,11 +93,11 @@ public class FileUtils {
 		}
 	}
 
-	public static String getResourceContent(String fileName) throws IOException {
+	public String getResourceContent(String fileName) throws IOException {
 		return StringUtils.getString(Main.class.getResourceAsStream("/" + fileName));
 	}
 
-	public static void deleteDir(File dir) throws IOException {
+	public void deleteDir(File dir) throws IOException {
 		if (dir.isDirectory()) {
 			for (File file : dir.listFiles())
 				deleteDir(file);

@@ -3,7 +3,7 @@ package com.csetutorials.ssj;
 import com.csetutorials.ssj.beans.*;
 import com.csetutorials.ssj.contants.DefaultDirs;
 import com.csetutorials.ssj.contants.PathService;
-import com.csetutorials.ssj.utils.*;
+import com.csetutorials.ssj.services.*;
 import org.apache.commons.cli.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,6 +29,8 @@ public class Main {
 	PageService pageService;
 	@Autowired
 	SitemapCreator sitemapCreator;
+	@Autowired
+	FileService fileService;
 
 	public void main(String[] args) throws Exception {
 
@@ -61,14 +63,14 @@ public class Main {
 		siteService.generateTagsPages(siteConfig, tagsPosts);
 		siteService.generateAuthorsPages(siteConfig, authorsPosts);
 		sitemapCreator.createSiteMap(siteConfig, posts, pages);
-		FileUtils.copyDirRecursively(siteConfig.getActiveThemeDir() + File.separator + DefaultDirs.staticDir,
+		fileService.copyDirRecursively(siteConfig.getActiveThemeDir() + File.separator + DefaultDirs.staticDir,
 				pathService.getGeneratedHtmlDir());
-		FileUtils.copyDirRecursively(pathService.getRootDir() + File.separator + DefaultDirs.staticDir,
+		fileService.copyDirRecursively(pathService.getRootDir() + File.separator + DefaultDirs.staticDir,
 				pathService.getGeneratedHtmlDir());
-		FileUtils.deleteDir(new File(pathService.getTempDir()));
+		fileService.deleteDir(new File(pathService.getTempDir()));
 	}
 
-	private static void generateSampleSite() throws FileNotFoundException {
+	private void generateSampleSite() throws FileNotFoundException {
 		SiteConfig config = new SiteConfig(true);
 
 		Scanner kb = new Scanner(System.in);
@@ -133,15 +135,15 @@ public class Main {
 		createAuthor(websiteDirPath, username, author);
 		config.setDefaultAuthor(username);
 		kb.close();
-		FileUtils.write(websiteDirPath + File.separator + "ssj.json", Constants.prettyGson.toJson(config));
+		fileService.write(websiteDirPath + File.separator + "ssj.json", Constants.prettyGson.toJson(config));
 	}
 
-	private static void createAuthor(String websiteDirPath, String username, Author author)
+	private void createAuthor(String websiteDirPath, String username, Author author)
 			throws FileNotFoundException {
 		String json = Constants.prettyGson.toJson(author);
 		String path = websiteDirPath + File.separator + "data" + File.separator + "authors" + File.separator + username
 				+ ".json";
-		FileUtils.write(path, json);
+		fileService.write(path, json);
 	}
 
 	private static SocialMediaLinks askSocialMediaLinks(Scanner kb) {
@@ -165,14 +167,14 @@ public class Main {
 		return social;
 	}
 
-	private static String getInput(Scanner kb) {
+	private String getInput(Scanner kb) {
 		String temp = null;
 		while (StringUtils.isBlank((temp = kb.nextLine().trim()))) {
 		}
 		return temp;
 	}
 
-	private static CommandLine getCommands(String[] args) throws FileNotFoundException {
+	private CommandLine getCommands(String[] args) throws FileNotFoundException {
 		Options options = buildOptions();
 
 		if (args.length > 0 && args[0].contains("help")) {
@@ -209,12 +211,12 @@ public class Main {
 		return cmd;
 	}
 
-	public static void generateSampleConfig() {
+	public void generateSampleConfig() {
 		System.out.println(Constants.prettyGson.toJson(new SiteConfig()));
 		System.exit(0);
 	}
 
-	private static Options buildOptions() {
+	private Options buildOptions() {
 		Options options = new Options();
 		options.addOption(Option.builder().longOpt("build").desc("Build website\n Default : Current Directory")
 				.argName("build").optionalArg(true).numberOfArgs(1).argName("website base dir path").build());

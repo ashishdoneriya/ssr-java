@@ -1,4 +1,4 @@
-package com.csetutorials.ssj.utils;
+package com.csetutorials.ssj.services;
 
 import com.csetutorials.ssj.beans.Author;
 import com.csetutorials.ssj.beans.CatTag;
@@ -16,6 +16,8 @@ public class PageService {
 
 	@Autowired
 	PathService pathService;
+	@Autowired
+	FileService fileService;
 
 	public List<Page> createPostsMetaData(SiteConfig siteConfig) throws Exception {
 		List<Page> posts = new ArrayList<>();
@@ -24,7 +26,7 @@ public class PageService {
 		Map<String, CatTag> categoriesMap = new HashMap<>();
 		Map<String, Author> authorsMap = new HashMap<>();
 
-		List<File> files = FileUtils.getFilesRecursively(pathService.getPostsDir());
+		List<File> files = fileService.getFilesRecursively(pathService.getPostsDir());
 		for (File file : files) {
 			Page post = getPageInfo(file, siteConfig, tagsMap, categoriesMap, authorsMap, true);
 			if (post != null) {
@@ -66,7 +68,7 @@ public class PageService {
 
 		Map<String, Author> authorsMap = new HashMap<>();
 
-		for (File file : FileUtils.getFilesRecursively(pathService.getPagesDir())) {
+		for (File file : fileService.getFilesRecursively(pathService.getPagesDir())) {
 			pages.add(getPageInfo(file, siteConfig, null, null, authorsMap, false));
 		}
 		siteConfig.setPages(pages);
@@ -76,7 +78,7 @@ public class PageService {
 
 	private Page getPageInfo(File file, SiteConfig siteConfig, Map<String, CatTag> tagsMap,
 			Map<String, CatTag> categoriesMap, Map<String, Author> authorsMap, boolean isPost) throws Exception {
-		String fileContent = FileUtils.getString(file);
+		String fileContent = fileService.getString(file);
 		Map<String, Object> rawParams = StringUtils.getRawParams(fileContent);
 		Boolean isDraft = (Boolean) rawParams.get("isDraft");
 		if (isDraft != null && isDraft) {

@@ -1,4 +1,4 @@
-package com.csetutorials.ssj.utils;
+package com.csetutorials.ssj.services;
 
 import com.csetutorials.ssj.beans.Page;
 import com.csetutorials.ssj.beans.SiteConfig;
@@ -20,10 +20,12 @@ public class SitemapCreator {
 	PathService pathService;
 	@Autowired
 	TemplateService templateService;
+	@Autowired
+	FileService fileService;
 
 	public void createSiteMap(SiteConfig siteConfig, List<Page> posts, List<Page> pages) throws IOException {
 		String currentPageFilePath = pathService.getGeneratedHtmlDir() + File.separator + "main-sitemap.xsl";
-		FileUtils.write(currentPageFilePath, FileUtils.getResourceContent("main-sitemap.xsl"));
+		fileService.write(currentPageFilePath, fileService.getResourceContent("main-sitemap.xsl"));
 		Date postsLastUpdated = createPageSiteMap(siteConfig, posts, true);
 		Date pagesLastUpdated = createPageSiteMap(siteConfig, pages, false);
 		createIndex(siteConfig, postsLastUpdated, pagesLastUpdated);
@@ -59,7 +61,7 @@ public class SitemapCreator {
 		String content = templateService.formatContent(engine, context, "sitemap_index.xml");
 
 		String currentPageFilePath = pathService.getGeneratedHtmlDir() + File.separator + "sitemap_index.xml";
-		FileUtils.write(currentPageFilePath, content);
+		fileService.write(currentPageFilePath, content);
 	}
 
 	private Date createPageSiteMap(SiteConfig siteConfig, List<Page> pages, boolean arePosts)
@@ -88,7 +90,7 @@ public class SitemapCreator {
 
 		String currentPageFilePath = pathService.getGeneratedHtmlDir() + File.separator
 				+ (arePosts ? "post-sitemap.xml" : "page-sitemap.xml");
-		FileUtils.write(currentPageFilePath, content);
+		fileService.write(currentPageFilePath, content);
 		return lastUpdated;
 	}
 

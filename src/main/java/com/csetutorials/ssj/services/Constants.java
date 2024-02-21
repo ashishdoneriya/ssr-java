@@ -1,4 +1,4 @@
-package com.csetutorials.ssj.utils;
+package com.csetutorials.ssj.services;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

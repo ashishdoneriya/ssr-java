@@ -1,4 +1,4 @@
-package com.csetutorials.ssj.utils;
+package com.csetutorials.ssj.services;
 
 import org.yaml.snakeyaml.Yaml;
 

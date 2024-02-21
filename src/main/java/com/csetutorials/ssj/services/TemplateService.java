@@ -1,4 +1,4 @@
-package com.csetutorials.ssj.utils;
+package com.csetutorials.ssj.services;
 
 import com.csetutorials.ssj.beans.SiteConfig;
 import com.csetutorials.ssj.contants.DefaultDirs;
@@ -30,6 +30,8 @@ public class TemplateService {
 
 	@Autowired
 	PathService pathService;
+	@Autowired
+	FileService fileService;
 
 	public void createEngine(SiteConfig config) throws IOException {
 		// Initialize the engine.
@@ -43,11 +45,11 @@ public class TemplateService {
 				.getApplicationAttribute(StringResourceLoader.REPOSITORY_NAME_DEFAULT);
 
 		createLayouts(config);
-		for (File file : FileUtils.getFilesRecursively(pathService.getTempLayoutsDir())) {
-			repo.putStringResource(file.getName(), FileUtils.getString(file.getAbsolutePath()));
+		for (File file : fileService.getFilesRecursively(pathService.getTempLayoutsDir())) {
+			repo.putStringResource(file.getName(), fileService.getString(file.getAbsolutePath()));
 		}
-		repo.putStringResource("sitemap_index.xml", FileUtils.getResourceContent("sitemap_index.xml"));
-		repo.putStringResource("page-sitemap.xml", FileUtils.getResourceContent("page-sitemap.xml"));
+		repo.putStringResource("sitemap_index.xml", fileService.getResourceContent("sitemap_index.xml"));
+		repo.putStringResource("page-sitemap.xml", fileService.getResourceContent("page-sitemap.xml"));
 		config.setVelocityEngine(engine);
 	}
 
@@ -78,35 +80,27 @@ public class TemplateService {
 		return renderer.render(document);
 	}
 
-	/*
-	 * public static VelocityEngine getVelocityEngine(SiteConfig siteConfig) {
-	 * VelocityEngine engine = new VelocityEngine();
-	 * engine.setProperty(RuntimeConstants.RESOURCE_LOADER, "file");
-	 * engine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH,
-	 * siteConfig.getTempLayoutsPath()); return engine; }
-	 */
-
 	private void createLayouts(SiteConfig siteConfig) throws IOException {
 		// Extracting themes layouts
-		for (File layoutFile : FileUtils
+		for (File layoutFile : fileService
 				.getFilesRecursively(siteConfig.getActiveThemeDir() + File.separator + DefaultDirs.layouts)) {
-			FileUtils.copyFile(layoutFile, new File(pathService.getTempLayoutsDir() + File.separator + layoutFile.getName()));
+			fileService.copyFile(layoutFile, new File(pathService.getTempLayoutsDir() + File.separator + layoutFile.getName()));
 		}
 
-		for (File layoutFile : FileUtils.getFilesRecursively(pathService.getRootDir() + File.separator + DefaultDirs.layouts)) {
-			FileUtils.copyFile(layoutFile, new File(pathService.getTempLayoutsDir() + File.separator + layoutFile.getName()));
+		for (File layoutFile : fileService.getFilesRecursively(pathService.getRootDir() + File.separator + DefaultDirs.layouts)) {
+			fileService.copyFile(layoutFile, new File(pathService.getTempLayoutsDir() + File.separator + layoutFile.getName()));
 		}
 
 		// Creating actual layouts
-		for (File templateFile : FileUtils.getFilesRecursively(pathService.getTempLayoutsDir())) {
+		for (File templateFile : fileService.getFilesRecursively(pathService.getTempLayoutsDir())) {
 			String templateContent = generateTemplate(pathService.getTempLayoutsDir(), templateFile.getName());
-			FileUtils.write(pathService.getTempLayoutsDir() + File.separator + templateFile.getName(), templateContent);
+			fileService.write(pathService.getTempLayoutsDir() + File.separator + templateFile.getName(), templateContent);
 		}
 	}
 
 	private String generateTemplate(String layoutPath, String templateName) throws IOException {
 		layoutPath += File.separator;
-		String fileContent = FileUtils.getString(layoutPath + templateName);
+		String fileContent = fileService.getString(layoutPath + templateName);
 		while (true) {
 
 			Map<String, Object> params = StringUtils.getRawParams(fileContent);
@@ -116,7 +110,7 @@ public class TemplateService {
 			templateName = (String) params.get("layout");
 			String parentContent = null;
 			try {
-				parentContent = FileUtils.getString(layoutPath + templateName);
+				parentContent = fileService.getString(layoutPath + templateName);
 			} catch (IOException e) {
 				System.out.println(e.getMessage());
 				return StringUtils.getContentBody(fileContent);

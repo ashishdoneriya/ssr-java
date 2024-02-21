@@ -3,7 +3,7 @@ package com.csetutorials.ssj.beans;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.csetutorials.ssj.utils.StringUtils;
+import com.csetutorials.ssj.services.StringUtils;
 import lombok.Getter;
 import lombok.Setter;
 

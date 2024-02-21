@@ -1,4 +1,4 @@
-package com.csetutorials.ssj.utils;
+package com.csetutorials.ssj.services;
 
 import com.csetutorials.ssj.beans.*;
 import com.csetutorials.ssj.contants.Layouts;
@@ -37,9 +37,11 @@ public class SiteService {
 	PathService pathService;
 	@Autowired
 	TemplateService templateService;
+	@Autowired
+	FileService fileService;
 
 	public SiteConfig getSiteConfig() throws JsonSyntaxException, IOException {
-		String json = FileUtils.getString(pathService.getSiteConfigDir());
+		String json = fileService.getString(pathService.getSiteConfigDir());
 		Type type = new TypeToken<Map<String, Object>>() {
 		}.getType();
 		Map<String, Object> rawConfig = Constants.gson.fromJson(json, type);
@@ -189,7 +191,7 @@ public class SiteService {
 			context.put("paginator", paginator);
 			String pageLayoutContent = templateService.formatContent(engine, context, siteConfig.getLatestPostsLayout());
 			pageLayoutContent = Jsoup.parse(pageLayoutContent).toString();
-			FileUtils.write(currentPageFilePath, pageLayoutContent);
+			fileService.write(currentPageFilePath, pageLayoutContent);
 		}
 	}
 
@@ -246,7 +248,7 @@ public class SiteService {
 				String pageLayoutContent = templateService.formatContent(engine, context,
 						siteConfig.getCategoriesLayout());
 				pageLayoutContent = Jsoup.parse(pageLayoutContent).toString();
-				FileUtils.write(currentPageFilePath, pageLayoutContent);
+				fileService.write(currentPageFilePath, pageLayoutContent);
 			}
 		}
 	}
@@ -301,7 +303,7 @@ public class SiteService {
 				context.put("tag", tag);
 				String pageLayoutContent = templateService.formatContent(engine, context, siteConfig.getTagsLayout());
 				pageLayoutContent = Jsoup.parse(pageLayoutContent).toString();
-				FileUtils.write(currentPageFilePath, pageLayoutContent);
+				fileService.write(currentPageFilePath, pageLayoutContent);
 			}
 		}
 	}
@@ -323,7 +325,7 @@ public class SiteService {
 		context.put("data", siteConfig.getData());
 		context.put("dateUtils", new DateUtils());
 		context.put("StringUtils", StringUtils.class);
-		final String metaTagsFormat = FileUtils.getResourceContent("post-meta-tags.html");
+		final String metaTagsFormat = fileService.getResourceContent("post-meta-tags.html");
 		templateService.addTemplate(siteConfig, "ssj-meta-tags", metaTagsFormat);
 		for (Page page : pages) {
 			if (page.isDraft()) {
@@ -331,7 +333,7 @@ public class SiteService {
 			}
 			Map<String, Object> map = createMap(page);
 			context.put("page", map);
-			String content = StringUtils.getContentBody(FileUtils.getString(page.getFile()));
+			String content = StringUtils.getContentBody(fileService.getString(page.getFile()));
 			if (page.getFile().getName().endsWith(".md") || page.getFile().getName().endsWith(".markdown")) {
 				content = templateService.parseMarkdown(content);
 			}
@@ -404,7 +406,7 @@ public class SiteService {
 		path = path.replaceAll("/+", "/").replaceAll("/", File.separator);
 		File file = new File(path);
 		file.getParentFile().mkdirs();
-		FileUtils.write(file.getAbsolutePath(), content);
+		fileService.write(file.getAbsolutePath(), content);
 	}
 
 	public void writePost(String postPermalink, String postContent, SiteConfig siteConfig)
@@ -414,10 +416,10 @@ public class SiteService {
 		path = path.replaceAll("/+", "/").replaceAll("/", File.separator);
 		File file = new File(path);
 		file.getParentFile().mkdirs();
-		FileUtils.write(file.getAbsolutePath(), postContent);
+		fileService.write(file.getAbsolutePath(), postContent);
 	}
 
-	public static String getCotentFormatted(VelocityContext context, String content) {
+	public String getCotentFormatted(VelocityContext context, String content) {
 		// Initialize the engine.
 		VelocityEngine engine = new VelocityEngine();
 		engine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
@@ -491,7 +493,7 @@ public class SiteService {
 				context.put("author", list.get(0).getAuthor());
 				String pageLayoutContent = templateService.formatContent(engine, context, siteConfig.getAuthorLayout());
 				pageLayoutContent = Jsoup.parse(pageLayoutContent).toString();
-				FileUtils.write(currentPageFilePath, pageLayoutContent);
+				fileService.write(currentPageFilePath, pageLayoutContent);
 			}
 		}
 	}

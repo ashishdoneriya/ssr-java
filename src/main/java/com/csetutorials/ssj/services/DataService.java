@@ -1,4 +1,4 @@
-package com.csetutorials.ssj.utils;
+package com.csetutorials.ssj.services;
 
 import com.csetutorials.ssj.beans.Author;
 import com.csetutorials.ssj.beans.SiteConfig;
@@ -18,6 +18,8 @@ public class DataService {
 
 	@Autowired
 	PathService pathService;
+	@Autowired
+	FileService fileService;
 
 	public void readData(SiteConfig siteConfig) throws JsonSyntaxException, IOException {
 		File dataDir = new File(pathService.getDataDir());
@@ -42,7 +44,7 @@ public class DataService {
 	}
 
 	private Object getObject(File file) throws JsonSyntaxException, IOException {
-		return Constants.gson.fromJson(FileUtils.getString(file.getAbsolutePath()), Object.class);
+		return Constants.gson.fromJson(fileService.getString(file.getAbsolutePath()), Object.class);
 	}
 
 	private Object readDir(File dir) throws JsonSyntaxException, IOException {
@@ -70,7 +72,7 @@ public class DataService {
 		for (File authorFile : authorsDir.listFiles()) {
 			String content;
 			try {
-				content = FileUtils.getString(authorFile);
+				content = fileService.getString(authorFile);
 			} catch (IOException e) {
 				throw new IOException("Problem while reading the file - " + authorFile.getAbsolutePath(), e);
 			}
