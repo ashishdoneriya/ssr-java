@@ -6,4 +6,7 @@ public class JsonParsingException extends RuntimeException {
 		super(e);
 	}
 
+	public JsonParsingException(String message, Throwable e) {
+		super(message, e);
+	}
 }

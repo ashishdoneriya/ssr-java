@@ -1,5 +1,6 @@
 package com.csetutorials.ssj.beans;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.velocity.app.VelocityEngine;
@@ -9,7 +10,7 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class SiteConfig {
+public class WebsiteConfig {
 
 	private String title;
 	private String baseUrl;
@@ -32,20 +33,28 @@ public class SiteConfig {
 	private int maxPosts;
 	private String theme;
 	private String defaultAuthor;
-	private transient String categoriesLayout;
-	private transient String tagsLayout;
-	private transient String latestPostsLayout;
-	private transient String authorLayout;
-	private transient String activeThemeDir;
-	private transient Map<String, Object> rawConfig;
-	private transient VelocityEngine velocityEngine;
+	@JsonIgnore
+	private String categoriesLayout;
+	@JsonIgnore
+	private String tagsLayout;
+	@JsonIgnore
+	private String latestPostsLayout;
+	@JsonIgnore
+	private String authorLayout;
+	@JsonIgnore
+	private String activeThemeDir;
+	@JsonIgnore
+	private Map<String, Object> rawConfig;
+	@JsonIgnore
+	private VelocityEngine velocityEngine;
 	private List<Page> posts, pages;
 	private List<CatTag> categories, tags;
 	private Map<String, Object> data;
-	private transient Map<String, Author> authors;
+	@JsonIgnore
+	private Map<String, Author> authors;
 	private SocialMediaLinks publisherSocialLinks;
 
-	public SiteConfig() {
+	public WebsiteConfig() {
 		this.title = "My Site";
 		this.baseUrl = "/";
 		this.description = "This is a description";
@@ -70,7 +79,7 @@ public class SiteConfig {
 
 	// Getter Methods
 
-	public SiteConfig(boolean b) {
+	public WebsiteConfig(boolean b) {
 		// TODO Auto-generated constructor stub
 	}
 

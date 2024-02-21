@@ -4,10 +4,7 @@ import com.csetutorials.ssj.exceptions.JsonParsingException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.lang.reflect.Type;
 
 @Service
 public class JsonService {
@@ -16,15 +13,6 @@ public class JsonService {
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {
 			return objectMapper.readValue(json, clazz);
-		} catch (JsonProcessingException e) {
-			throw new JsonParsingException(e);
-		}
-	}
-
-	public String convert(Object obj) {
-		ObjectMapper objectMapper = new ObjectMapper();
-		try {
-			return objectMapper.writeValueAsString(obj);
 		} catch (JsonProcessingException e) {
 			throw new JsonParsingException(e);
 		}

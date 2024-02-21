@@ -1,7 +1,7 @@
 package com.csetutorials.ssj.services;
 
 import com.csetutorials.ssj.beans.Page;
-import com.csetutorials.ssj.beans.SiteConfig;
+import com.csetutorials.ssj.beans.WebsiteConfig;
 import com.csetutorials.ssj.contants.PathService;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.*;
 
 @Service
@@ -23,36 +21,35 @@ public class SitemapCreator {
 	@Autowired
 	FileService fileService;
 
-	public void createSiteMap(SiteConfig siteConfig, List<Page> posts, List<Page> pages) throws IOException {
+	public void createSiteMap(WebsiteConfig websiteConfig, List<Page> posts, List<Page> pages) {
 		String currentPageFilePath = pathService.getGeneratedHtmlDir() + File.separator + "main-sitemap.xsl";
 		fileService.write(currentPageFilePath, fileService.getResourceContent("main-sitemap.xsl"));
-		Date postsLastUpdated = createPageSiteMap(siteConfig, posts, true);
-		Date pagesLastUpdated = createPageSiteMap(siteConfig, pages, false);
-		createIndex(siteConfig, postsLastUpdated, pagesLastUpdated);
+		Date postsLastUpdated = createPageSiteMap(websiteConfig, posts, true);
+		Date pagesLastUpdated = createPageSiteMap(websiteConfig, pages, false);
+		createIndex(websiteConfig, postsLastUpdated, pagesLastUpdated);
 	}
 
-	private void createIndex(SiteConfig siteConfig, Date postsLastUpdated, Date pagesLastUpdated)
-			throws FileNotFoundException {
-		String xslPath = StringUtils.removeExtraSlash(siteConfig.getUrl() + siteConfig.getBaseUrl())
+	private void createIndex(WebsiteConfig websiteConfig, Date postsLastUpdated, Date pagesLastUpdated) {
+		String xslPath = StringUtils.removeExtraSlash(websiteConfig.getUrl() + websiteConfig.getBaseUrl())
 				+ "/main-sitemap.xsl";
 
 		List<Map<String, String>> siteMaps = new ArrayList<>(2);
 
 		Map<String, String> postSiteMap = new HashMap<>(2);
 		postSiteMap.put("url", StringUtils
-				.removeExtraSlash(siteConfig.getUrl() + "/" + siteConfig.getBaseUrl() + "/post-sitemap.xml"));
+				.removeExtraSlash(websiteConfig.getUrl() + "/" + websiteConfig.getBaseUrl() + "/post-sitemap.xml"));
 		postSiteMap.put("lastMod", DateUtils.getSiteMapString(postsLastUpdated));
 
 		siteMaps.add(postSiteMap);
 
 		Map<String, String> pageSiteMap = new HashMap<>(2);
 		pageSiteMap.put("url", StringUtils
-				.removeExtraSlash(siteConfig.getUrl() + "/" + siteConfig.getBaseUrl() + "/page-sitemap.xml"));
+				.removeExtraSlash(websiteConfig.getUrl() + "/" + websiteConfig.getBaseUrl() + "/page-sitemap.xml"));
 		pageSiteMap.put("lastMod", DateUtils.getSiteMapString(pagesLastUpdated));
 
 		siteMaps.add(pageSiteMap);
 
-		VelocityEngine engine = siteConfig.getVelocityEngine();
+		VelocityEngine engine = websiteConfig.getVelocityEngine();
 		VelocityContext context = new VelocityContext();
 
 		context.put("xslPath", xslPath);
@@ -64,20 +61,19 @@ public class SitemapCreator {
 		fileService.write(currentPageFilePath, content);
 	}
 
-	private Date createPageSiteMap(SiteConfig siteConfig, List<Page> pages, boolean arePosts)
-			throws FileNotFoundException {
+	private Date createPageSiteMap(WebsiteConfig websiteConfig, List<Page> pages, boolean arePosts) {
 
-		String xslPath = StringUtils.removeExtraSlash(siteConfig.getUrl() + siteConfig.getBaseUrl())
+		String xslPath = StringUtils.removeExtraSlash(websiteConfig.getUrl() + websiteConfig.getBaseUrl())
 				+ "/main-sitemap.xsl";
 
 		String websiteUrl;
 		if (arePosts) {
-			websiteUrl = StringUtils.removeExtraSlash(siteConfig.getUrl() + "/" + siteConfig.getLatestPostsBase());
+			websiteUrl = StringUtils.removeExtraSlash(websiteConfig.getUrl() + "/" + websiteConfig.getLatestPostsBase());
 		} else {
-			websiteUrl = StringUtils.removeExtraSlash(siteConfig.getUrl());
+			websiteUrl = StringUtils.removeExtraSlash(websiteConfig.getUrl());
 		}
 
-		VelocityEngine engine = siteConfig.getVelocityEngine();
+		VelocityEngine engine = websiteConfig.getVelocityEngine();
 		VelocityContext context = new VelocityContext();
 		Date lastUpdated = getLastUpdated(pages);
 

@@ -1,10 +1,10 @@
 package com.csetutorials.ssj.services;
 
-import com.csetutorials.ssj.beans.Author;
 import com.csetutorials.ssj.beans.CatTag;
 import com.csetutorials.ssj.beans.Page;
-import com.csetutorials.ssj.beans.SiteConfig;
+import com.csetutorials.ssj.beans.WebsiteConfig;
 import com.csetutorials.ssj.contants.PathService;
+import com.csetutorials.ssj.exceptions.MetaDataException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,16 +19,15 @@ public class PageService {
 	@Autowired
 	FileService fileService;
 
-	public List<Page> createPostsMetaData(SiteConfig siteConfig) throws Exception {
+	public List<Page> createPostsMetaData(WebsiteConfig websiteConfig) {
 		List<Page> posts = new ArrayList<>();
 
 		Map<String, CatTag> tagsMap = new HashMap<>();
 		Map<String, CatTag> categoriesMap = new HashMap<>();
-		Map<String, Author> authorsMap = new HashMap<>();
 
 		List<File> files = fileService.getFilesRecursively(pathService.getPostsDir());
 		for (File file : files) {
-			Page post = getPageInfo(file, siteConfig, tagsMap, categoriesMap, authorsMap, true);
+			Page post = getPageInfo(file, websiteConfig, tagsMap, categoriesMap, true);
 			if (post != null) {
 				posts.add(post);
 			}
@@ -52,32 +51,30 @@ public class PageService {
 		List<CatTag> tags = new ArrayList<>(tagsMap.values());
 		List<CatTag> cats = new ArrayList<>(categoriesMap.values());
 
-		siteConfig.setTags(tags);
-		siteConfig.setCategories(cats);
-		siteConfig.setPosts(posts);
+		websiteConfig.setTags(tags);
+		websiteConfig.setCategories(cats);
+		websiteConfig.setPosts(posts);
 
-		siteConfig.getRawConfig().put("tags", tags);
-		siteConfig.getRawConfig().put("categories", cats);
-		siteConfig.getRawConfig().put("posts", posts);
+		websiteConfig.getRawConfig().put("tags", tags);
+		websiteConfig.getRawConfig().put("categories", cats);
+		websiteConfig.getRawConfig().put("posts", posts);
 
 		return posts;
 	}
 
-	public List<Page> createPagesMetaData(SiteConfig siteConfig) throws Exception {
+	public List<Page> createPagesMetaData(WebsiteConfig websiteConfig) {
 		List<Page> pages = new ArrayList<>();
 
-		Map<String, Author> authorsMap = new HashMap<>();
-
 		for (File file : fileService.getFilesRecursively(pathService.getPagesDir())) {
-			pages.add(getPageInfo(file, siteConfig, null, null, authorsMap, false));
+			pages.add(getPageInfo(file, websiteConfig, null, null, false));
 		}
-		siteConfig.setPages(pages);
-		siteConfig.getRawConfig().put("pages", pages);
+		websiteConfig.setPages(pages);
+		websiteConfig.getRawConfig().put("pages", pages);
 		return pages;
 	}
 
-	private Page getPageInfo(File file, SiteConfig siteConfig, Map<String, CatTag> tagsMap,
-			Map<String, CatTag> categoriesMap, Map<String, Author> authorsMap, boolean isPost) throws Exception {
+	private Page getPageInfo(File file, WebsiteConfig websiteConfig, Map<String, CatTag> tagsMap,
+							 Map<String, CatTag> categoriesMap, boolean isPost) {
 		String fileContent = fileService.getString(file);
 		Map<String, Object> rawParams = StringUtils.getRawParams(fileContent);
 		Boolean isDraft = (Boolean) rawParams.get("isDraft");
@@ -90,7 +87,7 @@ public class PageService {
 		String title = (String) rawParams.get("title");
 		if (title == null) {
 			if (isPost) {
-				throw new Exception("Title missing in post - " + file.getAbsolutePath());
+				throw new MetaDataException("Title missing in post - " + file.getAbsolutePath());
 			} else {
 				title = file.getName();
 			}
@@ -110,16 +107,16 @@ public class PageService {
 
 		if (isPost) {
 			// Setting categories
-			page.setCategories(createCategories(categoriesMap, siteConfig, (List<String>) rawParams.get("categories")));
-			page.setTags(createTags(tagsMap, siteConfig, (List<String>) rawParams.get("tags")));
+			page.setCategories(createCategories(categoriesMap, websiteConfig, (List<String>) rawParams.get("categories")));
+			page.setTags(createTags(tagsMap, websiteConfig, (List<String>) rawParams.get("tags")));
 		}
 
 		// Setting author info
 		String author = (String) rawParams.get("author");
 		if (StringUtils.isBlank(author)) {
-			author = siteConfig.getDefaultAuthor();
+			author = websiteConfig.getDefaultAuthor();
 		}
-		page.setAuthor(siteConfig.getAuthors().get(author));
+		page.setAuthor(websiteConfig.getAuthors().get(author));
 
 		// Setting summary
 		page.setSummary((String) rawParams.get("summary"));
@@ -130,7 +127,7 @@ public class PageService {
 		// Setting layout
 		String layout = (String) rawParams.get("layout");
 		if (StringUtils.isBlank(layout)) {
-			layout = isPost ? siteConfig.getPostLayout() : siteConfig.getPageLayout();
+			layout = isPost ? websiteConfig.getPostLayout() : websiteConfig.getPageLayout();
 
 		}
 		page.setLayout(layout);
@@ -151,15 +148,15 @@ public class PageService {
 		// Setting permalink
 		String permalink = (String) rawParams.get("permalink");
 		if (StringUtils.isBlank(permalink)) {
-			permalink = siteConfig.getPostPermalink();
+			permalink = websiteConfig.getPostPermalink();
 		}
 		permalink = formatPermalink(page, permalink);
 		page.setPermalink(permalink);
 
 		// Setting url
-		page.setUrl(createUrl(siteConfig, page.getPermalink()));
+		page.setUrl(createUrl(websiteConfig, page.getPermalink()));
 
-		page.setAbsoluteUrl(StringUtils.removeExtraSlash(siteConfig.getUrl() + "/" + page.getUrl()));
+		page.setAbsoluteUrl(StringUtils.removeExtraSlash(websiteConfig.getUrl() + "/" + page.getUrl()));
 
 		// Setting file obj
 		page.setFile(file);
@@ -170,7 +167,7 @@ public class PageService {
 		return page;
 	}
 
-	private List<CatTag> createTags(Map<String, CatTag> tagsMap, SiteConfig siteConfig, List<String> sTagsList) {
+	private List<CatTag> createTags(Map<String, CatTag> tagsMap, WebsiteConfig websiteConfig, List<String> sTagsList) {
 		List<CatTag> tags = new ArrayList<>();
 		if (sTagsList == null) {
 			return tags;
@@ -183,7 +180,7 @@ public class PageService {
 				CatTag tagObj = new CatTag();
 				tagObj.setShortcode(sTag);
 				tagObj.setName(StringUtils.toFirstCharUpperAll(sTag));
-				String url = siteConfig.getBaseUrl() + "/" + siteConfig.getTagBase() + "/" + sTag;
+				String url = websiteConfig.getBaseUrl() + "/" + websiteConfig.getTagBase() + "/" + sTag;
 				tagObj.setUrl(url);
 				tags.add(tagObj);
 				tagsMap.put(sTag, tagObj);
@@ -192,12 +189,12 @@ public class PageService {
 		return tags;
 	}
 
-	private List<CatTag> createCategories(Map<String, CatTag> catsMap, SiteConfig siteConfig,
+	private List<CatTag> createCategories(Map<String, CatTag> catsMap, WebsiteConfig websiteConfig,
 			List<String> sCatList) {
 		List<CatTag> categories = new ArrayList<>();
 		if (sCatList == null) {
 			sCatList = new ArrayList<>(1);
-			sCatList.add(siteConfig.getCategory());
+			sCatList.add(websiteConfig.getCategory());
 		}
 		for (String sCat : sCatList) {
 			CatTag tag = catsMap.get(sCat);
@@ -208,7 +205,7 @@ public class PageService {
 				catObj.setShortcode(sCat);
 				catObj.setName(StringUtils.toFirstCharUpperAll(sCat).replaceAll("-", " "));
 				String url = StringUtils
-						.removeExtraSlash(siteConfig.getBaseUrl() + "/" + siteConfig.getCategoryBase() + "/" + sCat);
+						.removeExtraSlash(websiteConfig.getBaseUrl() + "/" + websiteConfig.getCategoryBase() + "/" + sCat);
 				catObj.setUrl(url);
 				categories.add(catObj);
 				catsMap.put(sCat, catObj);
@@ -217,8 +214,8 @@ public class PageService {
 		return categories;
 	}
 
-	private String createUrl(SiteConfig siteConfig, String postPermalink) {
-		return StringUtils.removeExtraSlash(siteConfig.getBaseUrl() + "/" + postPermalink);
+	private String createUrl(WebsiteConfig websiteConfig, String postPermalink) {
+		return StringUtils.removeExtraSlash(websiteConfig.getBaseUrl() + "/" + postPermalink);
 	}
 
 	private String formatPermalink(Page page, String permalink) {

@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -33,47 +32,48 @@ public class Main {
 	FileService fileService;
 	@Autowired
 	JsonService jsonService;
+	@Autowired
+	WebsiteConfigService websiteConfigService;
 
-	public void main(String[] args) throws Exception {
+	public void process(String[] args) {
 
 		CommandLine cmd = getCommands(args);
 
 		String root = cmd.getOptionValue("build", new File("").getAbsolutePath());
 		pathService.setRootDir(StringUtils.removeExtraSlash(root));
-		SiteConfig siteConfig = siteService.getSiteConfig();
+		WebsiteConfig websiteConfig = websiteConfigService.getSiteConfig();
+		dataService.readData(websiteConfig);
+		dataService.loadAllAuthors(websiteConfig);
 
-		dataService.readData(siteConfig);
-		dataService.loadAllAuthors(siteConfig);
+		List<Page> posts = pageService.createPostsMetaData(websiteConfig);
+		List<Page> pages = pageService.createPagesMetaData(websiteConfig);
 
-		List<Page> posts = pageService.createPostsMetaData(siteConfig);
-		List<Page> pages = pageService.createPagesMetaData(siteConfig);
-
-		templateService.createEngine(siteConfig);
+		templateService.createEngine(websiteConfig);
 		Map<CatTag, List<Page>> tagsPosts = pageService.extractTagsWithRelatedPosts(posts);
 		Map<CatTag, List<Page>> catsPosts = pageService.extractCategoriesWithRelatedPosts(posts);
 		Map<String, List<Page>> authorsPosts = pageService.extractAuthorWithRelatedPosts(posts);
 
-		siteConfig.getRawConfig().put("tags", pageService.extractTags(posts));
-		siteConfig.getRawConfig().put("categories", pageService.extractCategories(posts));
-		siteConfig.getRawConfig().put("tagPosts", tagsPosts);
-		siteConfig.getRawConfig().put("categoriesPosts", catsPosts);
-		siteService.generatePosts(posts, siteConfig, true);
-		siteService.generatePosts(pages, siteConfig, false);
+		websiteConfig.getRawConfig().put("tags", pageService.extractTags(posts));
+		websiteConfig.getRawConfig().put("categories", pageService.extractCategories(posts));
+		websiteConfig.getRawConfig().put("tagPosts", tagsPosts);
+		websiteConfig.getRawConfig().put("categoriesPosts", catsPosts);
+		siteService.generatePosts(posts, websiteConfig, true);
+		siteService.generatePosts(pages, websiteConfig, false);
 
-		siteService.generateLatestPostsPages(siteConfig);
-		siteService.generateCategoriesPages(siteConfig, catsPosts);
-		siteService.generateTagsPages(siteConfig, tagsPosts);
-		siteService.generateAuthorsPages(siteConfig, authorsPosts);
-		sitemapCreator.createSiteMap(siteConfig, posts, pages);
-		fileService.copyDirRecursively(siteConfig.getActiveThemeDir() + File.separator + DefaultDirs.staticDir,
+		siteService.generateLatestPostsPages(websiteConfig);
+		siteService.generateCategoriesPages(websiteConfig, catsPosts);
+		siteService.generateTagsPages(websiteConfig, tagsPosts);
+		siteService.generateAuthorsPages(websiteConfig, authorsPosts);
+		sitemapCreator.createSiteMap(websiteConfig, posts, pages);
+		fileService.copyDirRecursively(websiteConfig.getActiveThemeDir() + File.separator + DefaultDirs.staticDir,
 				pathService.getGeneratedHtmlDir());
 		fileService.copyDirRecursively(pathService.getRootDir() + File.separator + DefaultDirs.staticDir,
 				pathService.getGeneratedHtmlDir());
 		fileService.deleteDir(new File(pathService.getTempDir()));
 	}
 
-	private void generateSampleSite() throws FileNotFoundException {
-		SiteConfig config = new SiteConfig(true);
+	private void generateSampleSite() {
+		WebsiteConfig config = new WebsiteConfig(true);
 
 		Scanner kb = new Scanner(System.in);
 		System.out.print("Website name [My Site] : ");
@@ -86,13 +86,11 @@ public class Main {
 		File file = new File("");
 		String dirName = title.replaceAll(" ", "-");
 		String websiteDirPath = file.getAbsolutePath() + File.separator + dirName;
-		// File websiteDir = new File(websiteDirPath);
-		// websiteDir.mkdirs();
 		System.out.print("Website url : ");
-		String url = null;
+		String url;
 		while (true) {
 			url = kb.nextLine().trim();
-			if (url.isEmpty() || !url.startsWith("http")) {
+			if (!url.startsWith("http")) {
 				System.out.print("Please enter a valid url that starts with 'http://' or 'https://' :");
 				continue;
 			}
@@ -137,11 +135,11 @@ public class Main {
 		createAuthor(websiteDirPath, username, author);
 		config.setDefaultAuthor(username);
 		kb.close();
-		fileService.write(websiteDirPath + File.separator + "ssj.json", jsonService.pretty(config));
+		String path = websiteDirPath + File.separator + "ssj.json";
+		fileService.write(path, jsonService.pretty(config));
 	}
 
-	private void createAuthor(String websiteDirPath, String username, Author author)
-			throws FileNotFoundException {
+	private void createAuthor(String websiteDirPath, String username, Author author) {
 		String json = jsonService.pretty(author);
 		String path = websiteDirPath + File.separator + "data" + File.separator + "authors" + File.separator + username
 				+ ".json";
@@ -170,13 +168,14 @@ public class Main {
 	}
 
 	private String getInput(Scanner kb) {
-		String temp = null;
-		while (StringUtils.isBlank((temp = kb.nextLine().trim()))) {
-		}
+		String temp;
+		do {
+			temp = kb.nextLine().trim();
+		}  while (StringUtils.isBlank(temp));
 		return temp;
 	}
 
-	private CommandLine getCommands(String[] args) throws FileNotFoundException {
+	private CommandLine getCommands(String[] args) {
 		Options options = buildOptions();
 
 		if (args.length > 0 && args[0].contains("help")) {

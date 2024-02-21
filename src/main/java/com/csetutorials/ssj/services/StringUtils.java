@@ -14,15 +14,15 @@ public class StringUtils {
 	public static String getContentBody(String content) {
 		int index1 = content.indexOf("---");
 		if (index1 == -1) {
-			return null;
+			return "";
 		}
 		int index3 = content.indexOf("---", index1 + 1);
 		if (index3 == -1) {
-			return null;
+			return "";
 		}
 		int index4 = content.indexOf("\n", index3 + 1);
 		if (index4 == -1) {
-			return null;
+			return "";
 		}
 		return content.substring(index4 + 1).trim();
 	}

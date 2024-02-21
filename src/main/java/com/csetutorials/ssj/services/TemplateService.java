@@ -1,6 +1,6 @@
 package com.csetutorials.ssj.services;
 
-import com.csetutorials.ssj.beans.SiteConfig;
+import com.csetutorials.ssj.beans.WebsiteConfig;
 import com.csetutorials.ssj.contants.DefaultDirs;
 import com.csetutorials.ssj.contants.PathService;
 import lombok.Setter;
@@ -19,7 +19,6 @@ import org.commonmark.renderer.html.HtmlRenderer;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
@@ -33,7 +32,7 @@ public class TemplateService {
 	@Autowired
 	FileService fileService;
 
-	public void createEngine(SiteConfig config) throws IOException {
+	public void createEngine(WebsiteConfig config) {
 		// Initialize the engine.
 		VelocityEngine engine = new VelocityEngine();
 		engine.setProperty(Velocity.RESOURCE_LOADER, "string");
@@ -53,7 +52,7 @@ public class TemplateService {
 		config.setVelocityEngine(engine);
 	}
 
-	public void addTemplate(SiteConfig config, String templateName, String templateContent) {
+	public void addTemplate(WebsiteConfig config, String templateName, String templateContent) {
 		// Initialize my template repository. You can replace the "Hello $w" with your
 		// String.
 		StringResourceRepository repo = (StringResourceRepository) config.getVelocityEngine()
@@ -61,8 +60,8 @@ public class TemplateService {
 		repo.putStringResource(templateName, templateContent);
 	}
 
-	public boolean isTemplateAvailable(SiteConfig config, String templateName) {
-		return config.getVelocityEngine().resourceExists(templateName);
+	public boolean isTemplateNotAvailable(WebsiteConfig config, String templateName) {
+		return !config.getVelocityEngine().resourceExists(templateName);
 	}
 
 	public String formatContent(VelocityEngine engine, VelocityContext context, String templateName) {
@@ -80,10 +79,10 @@ public class TemplateService {
 		return renderer.render(document);
 	}
 
-	private void createLayouts(SiteConfig siteConfig) throws IOException {
+	private void createLayouts(WebsiteConfig websiteConfig) {
 		// Extracting themes layouts
 		for (File layoutFile : fileService
-				.getFilesRecursively(siteConfig.getActiveThemeDir() + File.separator + DefaultDirs.layouts)) {
+				.getFilesRecursively(websiteConfig.getActiveThemeDir() + File.separator + DefaultDirs.layouts)) {
 			fileService.copyFile(layoutFile, new File(pathService.getTempLayoutsDir() + File.separator + layoutFile.getName()));
 		}
 
@@ -98,7 +97,7 @@ public class TemplateService {
 		}
 	}
 
-	private String generateTemplate(String layoutPath, String templateName) throws IOException {
+	private String generateTemplate(String layoutPath, String templateName) {
 		layoutPath += File.separator;
 		String fileContent = fileService.getString(layoutPath + templateName);
 		while (true) {
@@ -108,13 +107,7 @@ public class TemplateService {
 				return fileContent;
 			}
 			templateName = (String) params.get("layout");
-			String parentContent = null;
-			try {
-				parentContent = fileService.getString(layoutPath + templateName);
-			} catch (IOException e) {
-				System.out.println(e.getMessage());
-				return StringUtils.getContentBody(fileContent);
-			}
+			String parentContent = fileService.getString(layoutPath + templateName);
 
 			parentContent.replaceAll("\\$content", "REPLACE_ME_SSR");
 			fileContent = parentContent.replace("$content", StringUtils.getContentBody(fileContent));

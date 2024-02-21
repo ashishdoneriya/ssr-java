@@ -1,9 +1,11 @@
 package com.csetutorials.ssj.services;
 
 import com.csetutorials.ssj.Main;
+import com.csetutorials.ssj.exceptions.FileSystemException;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -14,11 +16,11 @@ import java.util.Stack;
 @Service
 public class FileService {
 
-	public String getString(String path) throws IOException {
+	public String getString(String path) {
 		return getString(new File(path));
 	}
 
-	public String getString(File file) throws IOException {
+	public String getString(File file) {
 		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 			StringBuilder stringBuilder = new StringBuilder();
 			String line;
@@ -33,15 +35,25 @@ public class FileService {
 			// delete the last new line separator
 			stringBuilder.deleteCharAt(stringBuilder.length() - 1);
 			return stringBuilder.toString();
+		} catch (IOException e) {
+			throw new FileSystemException("Problem while reading the file - " + file.getAbsolutePath(), e);
 		}
 	}
 
-	public void write(String path, String content) throws FileNotFoundException {
+	public void write(String path, String content) {
 		File file = new File(path);
-		file.getParentFile().mkdirs();
+		mkdirs(file.getParentFile());
 		try (PrintWriter out = new PrintWriter(file)) {
 			out.print(content);
 			out.flush();
+		} catch (IOException e) {
+			throw new FileSystemException("Problem while writing to the file - " + path, e);
+		}
+	}
+
+	public void mkdirs(File dir) {
+		if (!dir.exists() && !dir.mkdirs()) {
+			throw new FileSystemException("Couldn't create dir - " + dir.getAbsolutePath());
 		}
 	}
 
@@ -66,7 +78,7 @@ public class FileService {
 		return list;
 	}
 
-	public void copyDirRecursively(String srcDirPath, String destPath) throws IOException {
+	public void copyDirRecursively(String srcDirPath, String destPath) {
 		List<File> files = getFilesRecursively(srcDirPath);
 		Path pathBase = Paths.get(srcDirPath);
 		for (File srcFile : files) {
@@ -75,36 +87,45 @@ public class FileService {
 			String relativePath = pathRelative.toString();
 			String targetPath = new File(destPath).getAbsolutePath() + File.separator + relativePath;
 			File targetFile = new File(targetPath);
-			targetFile.getParentFile().mkdirs();
+			mkdirs(targetFile.getParentFile());
 			copyFile(srcFile, targetFile);
 		}
 	}
 
-	public void copyFile(File source, File dest) throws IOException {
-		dest.getParentFile().mkdirs();
-		if (dest.exists()) {
-			dest.delete();
+	public void copyFile(File source, File dest) {
+		mkdirs(dest.getParentFile());
+		try {
+			Files.deleteIfExists(dest.toPath());
+		} catch (IOException e) {
+			throw new FileSystemException("Couldn't clean path [" + dest.getAbsolutePath() + "] for copying [" + source.getAbsolutePath() + "]");
 		}
+
 		try (InputStream is = new FileInputStream(source); OutputStream os = new FileOutputStream(dest)) {
 			byte[] buffer = new byte[1024];
 			int length;
 			while ((length = is.read(buffer)) > 0) {
 				os.write(buffer, 0, length);
 			}
+		} catch (IOException e) {
+			throw new FileSystemException("Problem while copying the file from [ " + source.getAbsolutePath() + "] to [ " + dest.getAbsolutePath() +" ]", e);
 		}
 	}
 
-	public String getResourceContent(String fileName) throws IOException {
-		return StringUtils.getString(Main.class.getResourceAsStream("/" + fileName));
+	public String getResourceContent(String fileName) {
+		try {
+			return StringUtils.getString(Main.class.getResourceAsStream("/" + fileName));
+		} catch (IOException e) {
+			throw new FileSystemException("Problem while fetching the content of resouce [ " + fileName + " ]", e);
+		}
 	}
 
-	public void deleteDir(File dir) throws IOException {
+	public void deleteDir(File dir) {
 		if (dir.isDirectory()) {
 			for (File file : listFiles(dir))
 				deleteDir(file);
 		}
 		if (!dir.delete())
-			throw new FileNotFoundException("Failed to delete file: " + dir);
+			throw new FileSystemException("Failed to delete file: " + dir);
 	}
 
 	public List<File> listFiles(String dirPath) {

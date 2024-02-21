@@ -16,7 +16,7 @@ public class SsjApplication implements CommandLineRunner {
 	Main main;
 
 	@Override
-	public void run(String... args) throws Exception {
-		main.main(args);
+	public void run(String... args) {
+		main.process(args);
 	}
 }

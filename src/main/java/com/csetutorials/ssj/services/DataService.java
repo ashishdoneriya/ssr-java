@@ -1,14 +1,13 @@
 package com.csetutorials.ssj.services;
 
 import com.csetutorials.ssj.beans.Author;
-import com.csetutorials.ssj.beans.SiteConfig;
+import com.csetutorials.ssj.beans.WebsiteConfig;
 import com.csetutorials.ssj.beans.SocialMediaLinks;
 import com.csetutorials.ssj.contants.PathService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,7 +21,7 @@ public class DataService {
 	@Autowired
 	JsonService jsonService;
 
-	public void readData(SiteConfig siteConfig) throws IOException {
+	public void readData(WebsiteConfig websiteConfig) {
 		Map<String, Object> map = new HashMap<>();
 		for (File file : fileService.listFiles(pathService.getDataDir())) {
 			if (file.isFile()) {
@@ -35,14 +34,14 @@ public class DataService {
 				map.put(file.getName(), readDir(file));
 			}
 		}
-		siteConfig.setData(map);
+		websiteConfig.setData(map);
 	}
 
-	private Object getObject(File file) throws IOException {
+	private Object getObject(File file) {
 		return jsonService.convert(fileService.getString(file), Object.class);
 	}
 
-	private Object readDir(File dir) throws IOException {
+	private Object readDir(File dir) {
 		Map<String, Object> map = new HashMap<>();
 		for (File file : fileService.listFiles(dir)) {
 			if (file.isFile()) {
@@ -58,19 +57,14 @@ public class DataService {
 		return map;
 	}
 
-	public void loadAllAuthors(SiteConfig siteConfig) throws IOException {
+	public void loadAllAuthors(WebsiteConfig websiteConfig) {
 		Map<String, Author> authors = new HashMap<>();
 		for (File authorFile : fileService.listFiles(pathService.getAuthorsDir())) {
-			String content;
-			try {
-				content = fileService.getString(authorFile);
-			} catch (IOException e) {
-				throw new IOException("Problem while reading the file - " + authorFile.getAbsolutePath(), e);
-			}
+			String content = fileService.getString(authorFile);
 			Author authorObj = jsonService.convert(content, Author.class);
 			String username = authorFile.getName().replace(".json", "");
 			authors.put(username, authorObj);
-			String url = siteConfig.getBaseUrl() + "/" + siteConfig.getAuthorBase() + "/" + username;
+			String url = websiteConfig.getBaseUrl() + "/" + websiteConfig.getAuthorBase() + "/" + username;
 			url = StringUtils.removeExtraSlash(url);
 			authorObj.setUrl(url);
 			SocialMediaLinks socialMediaLinks = authorObj.getSocialMediaLinks();
@@ -88,11 +82,11 @@ public class DataService {
 
 		}
 
-		siteConfig.setAuthors(authors);
-		siteConfig.setPublisherSocialLinks(
-				authors.get(siteConfig.getDefaultAuthor()).getSocialMediaLinks());
-		siteConfig.getRawConfig().put("publisherSocialLinks", siteConfig.getPublisherSocialLinks());
-		setTwitterUsername(siteConfig.getPublisherSocialLinks());
+		websiteConfig.setAuthors(authors);
+		websiteConfig.setPublisherSocialLinks(
+				authors.get(websiteConfig.getDefaultAuthor()).getSocialMediaLinks());
+		websiteConfig.getRawConfig().put("publisherSocialLinks", websiteConfig.getPublisherSocialLinks());
+		setTwitterUsername(websiteConfig.getPublisherSocialLinks());
 	}
 
 	private static void setTwitterUsername(SocialMediaLinks publisherSocialLinks) {
