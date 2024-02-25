@@ -220,9 +220,14 @@ public class PageService {
 
 	private String formatPermalink(Page page, String permalink) {
 		String slug = page.getSlug();
+		if (page.getCategories() != null && !page.getCategories().isEmpty()) {
+			return permalink
+					.replaceAll(":slug", slug)
+					.replace(":category", page.getCategories().getFirst().getShortcode())
+					.replaceAll("/+", "/");
+		}
 		return permalink
 				.replaceAll(":slug", slug)
-				.replace(":category", page.getCategories().getFirst().getShortcode())
 				.replaceAll("/+", "/");
 	}
 

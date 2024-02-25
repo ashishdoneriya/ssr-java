@@ -73,14 +73,13 @@ public class Main {
 	}
 
 	private void generateSampleSite() {
-		WebsiteConfig config = new WebsiteConfig(true);
-
 		Scanner kb = new Scanner(System.in);
 		System.out.print("Website name [My Site] : ");
 		String title = kb.nextLine().trim();
 		if (title.isEmpty()) {
 			title = "My Site";
 		}
+		WebsiteConfig config = new WebsiteConfig();
 		config.setTitle(title);
 
 		File file = new File("");

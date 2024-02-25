@@ -34,6 +34,8 @@ public class WebsiteConfig {
 	private int maxPosts;
 	private String theme;
 	private String defaultAuthor;
+	private boolean displayCreatedDate = true;
+	private boolean displayUpdatedDate = true;
 	@JsonIgnore
 	private String categoriesLayout;
 	@JsonIgnore
@@ -76,12 +78,6 @@ public class WebsiteConfig {
 		this.latestPostsBase = "/";
 		this.paginationEnabled = true;
 		this.maxPosts = 10;
-	}
-
-	// Getter Methods
-
-	public WebsiteConfig(boolean b) {
-		// TODO Auto-generated constructor stub
 	}
 
 }
