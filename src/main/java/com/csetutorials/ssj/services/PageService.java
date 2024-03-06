@@ -26,13 +26,13 @@ public class PageService {
 	Configuration configuration;
 
 	public List<Page> readPages() {
-		String separator = Pattern.quote(configuration.getWebsiteInfo().getPostsMetaDataSeparator());
+		String separator = Pattern.quote(configuration.getWebsite().getPostsMetaDataSeparator());
 		Pattern pattern = Pattern.compile(separator + "(.+)" + separator + "(.+)", Pattern.MULTILINE);
 
 		Yaml yaml = new Yaml();
 		List<Page> pages = new ArrayList<>();
-		SimpleDateFormat parseSdf = new SimpleDateFormat(configuration.getWebsiteInfo().getPostsMetaDateFormat());
-		SimpleDateFormat formatSdf = new SimpleDateFormat(configuration.getWebsiteInfo().getPostsDisplayDateFormat());
+		SimpleDateFormat parseSdf = new SimpleDateFormat(configuration.getWebsite().getPostsMetaDateFormat());
+		SimpleDateFormat formatSdf = new SimpleDateFormat(configuration.getWebsite().getPostsDisplayDateFormat());
 
 		for (File file : fileService.listFiles(configuration.getSsjPaths().getPagesDir())) {
 			String fileContent = fileService.getString(file);
@@ -46,9 +46,7 @@ public class PageService {
 			if (meta.isDraft()) {
 				continue;
 			}
-			String pageContent = matcher.group(2);
-			meta.setContent(pageContent);
-
+			meta.setContent(matcher.group(2));
 			Page page = createPage(parseSdf, formatSdf, meta, file);
 			if (page != null) {
 				pages.add(page);
@@ -69,6 +67,7 @@ public class PageService {
 			setPageBasicInfo(parseSdf, formatSdf, meta, page, file);
 			setPageAuthor(meta, page);
 			setPageUrls(page, meta);
+			setContent(page, meta, file);
 			return page;
 		} catch (MetaDataException e) {
 			log.error("Error creating page for file - " + file.getName() + ", " + e.getMessage());
@@ -76,28 +75,33 @@ public class PageService {
 		}
 	}
 
+
+
 	private void setPageBasicInfo(SimpleDateFormat parseSdf, SimpleDateFormat formatSdf, PostYmlParams meta, Page page, File file) throws MetaDataException {
 		page.setTitle(meta.getTitle());
 		page.setSeoTitle(StringUtils.isNotBlank(meta.getSeoTitle()) ? meta.getSeoTitle() : meta.getTitle());
 		page.setDescription(meta.getDescription());
 		page.setSeoDescription(StringUtils.isNotBlank(meta.getSeoDescription()) ? meta.getSeoDescription() : meta.getDescription());
 		page.setDraft(meta.isDraft());
-		try {
-			page.setCreated(parseDate(meta.getCreated(), parseSdf, file.getName()));
-		} catch (ParseException e) {
-			throw new MetaDataException("Incorrect created date");
-		}
-		page.setCreatedUIDate(formatSdf.format(page.getCreated()));
-		if (StringUtils.isNotBlank(meta.getUpdated())) {
+		if (StringUtils.isNotBlank(meta.getCreated())) {
 			try {
-				page.setUpdated(parseDate(meta.getUpdated(), parseSdf, file.getName()));
+				page.setCreated(parseDate(meta.getCreated(), parseSdf, file.getName()));
 			} catch (ParseException e) {
-				throw new MetaDataException("Incorrect updated date");
+				throw new MetaDataException("Incorrect created date");
 			}
-		} else {
-			page.setUpdated(page.getCreated());
+			page.setCreatedUIDate(formatSdf.format(page.getCreated()));
+			if (StringUtils.isNotBlank(meta.getUpdated())) {
+				try {
+					page.setUpdated(parseDate(meta.getUpdated(), parseSdf, file.getName()));
+				} catch (ParseException e) {
+					throw new MetaDataException("Incorrect updated date");
+				}
+			} else {
+				page.setUpdated(page.getCreated());
+			}
+			page.setUpdatedUIDate(formatSdf.format(page.getUpdated()));
 		}
-		page.setUpdatedUIDate(formatSdf.format(page.getUpdated()));
+
 	}
 
 	private Date parseDate(String dateString, SimpleDateFormat sdf, String fileName) throws ParseException {
@@ -114,14 +118,16 @@ public class PageService {
 		Optional<Author> authorOpt = StringUtils.isNotBlank(authorName) ? configuration.getAuthor(authorName) : configuration.getDefaultAuthor();
 		if (authorOpt.isPresent()) {
 			page.setAuthor(authorOpt.get());
-		} else {
-			log.error("Author information not found for page - " + page.getTitle());
 		}
 	}
 
 	private void setPageUrls(Page page, PostYmlParams meta) {
-		page.setUrl(StringUtils.removeExtraSlash("/" + configuration.getWebsiteInfo().getBaseUrl() + "/" + generatePageUrl(page, meta)));
-		page.setAbsoluteUrl(StringUtils.removeExtraSlash(configuration.getWebsiteInfo().getUrl() + page.getUrl()));
+		page.setUrl(StringUtils.removeExtraSlash("/" + configuration.getWebsite().getBaseUrl() + "/" + generatePageUrl(page, meta)));
+		page.setAbsoluteUrl(StringUtils.removeExtraSlash(configuration.getWebsite().getUrl() + page.getUrl()));
+	}
+
+	private void setContent(Page page, PostYmlParams meta, File file) {
+		page.setContent(file.getName().endsWith(".md") ? StringUtils.parseMarkdown(meta.getContent()) : meta.getContent());
 	}
 
 	private void sortPages(List<Page> pages) {
@@ -131,13 +137,14 @@ public class PageService {
 	private String generatePageUrl(Page page, PostYmlParams meta) {
 		String slug = StringUtils.isNotBlank(meta.getSlug()) ? meta.getSlug().replaceAll(" +", "-") : page.getTitle().replaceAll("[^\\sa-zA-Z0-9]", "").replaceAll("\\s+", "-");
 		if (StringUtils.isNotBlank(slug)) {
-			return configuration.getWebsiteInfo().getPagePermalink().replace(":slug", slug.trim());
+			return configuration.getWebsite().getPagePermalink().replace(":slug", slug.trim());
 		}
 		String permalink = meta.getPermalink();
 		if (StringUtils.isNotBlank(permalink)) {
 			return permalink;
 		}
 		String newSlug = page.getTitle().replaceAll("[^\\sa-zA-Z0-9]", "").replaceAll("\\s+", "-");
-		return configuration.getWebsiteInfo().getPagePermalink().replace(":slug", newSlug);
+		return configuration.getWebsite().getPagePermalink().replace(":slug", newSlug);
 	}
+
 }

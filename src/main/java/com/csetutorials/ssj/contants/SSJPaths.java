@@ -46,4 +46,8 @@ public class SSJPaths {
 		return baseDir + File.separator + websiteInfo.getTagsDir();
 	}
 
+	public String getStaticContentDir() {
+		return baseDir + File.separator + websiteInfo.getStaticContentDir();
+	}
+
 }

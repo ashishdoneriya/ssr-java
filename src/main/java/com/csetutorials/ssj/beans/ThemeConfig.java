@@ -19,4 +19,8 @@ public class ThemeConfig {
 
 	String authorLayout = "author.html";
 
+	String indexLayout = "latest-posts.html";
+
+	String staticContentDir = "static";
+
 }

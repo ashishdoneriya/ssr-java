@@ -24,5 +24,6 @@ public class Page {
 	Author author;
 	String url;
 	String absoluteUrl;
+	String content;
 
 }

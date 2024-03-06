@@ -28,25 +28,6 @@ public class SiteService {
 	@Autowired
 	JsonService jsonService;
 
-
-	private Map<String, Object> createMap(Page page) {
-		Map<String, Object> map = new HashMap<>(page.getRawParams());
-		map.put("title", page.getTitle());
-		map.put("layout", page.getLayout());
-		map.put("slug", page.getSlug());
-		map.put("permalink", page.getPermalink());
-		map.put("url", page.getUrl());
-		map.put("created", page.getCreated());
-		map.put("updated", page.getUpdated());
-		map.put("author", page.getAuthor());
-		map.put("categories", page.getCategories());
-		map.put("tags", page.getTags());
-		map.put("isDraft", page.isDraft());
-		map.put("summary", page.getSummary());
-		map.put("absoluteUrl", page.getAbsoluteUrl());
-		return map;
-	}
-
 	public void generateLatestPostsPages(WebsiteInfo websiteInfo) {
 		if (templateService.isTemplateNotAvailable(websiteInfo, Layouts.latestPosts)) {
 			return;

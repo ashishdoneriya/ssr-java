@@ -25,7 +25,7 @@ public class WebsiteInfo {
 	String latestPostsBase = "/";
 	boolean paginationEnabled = true;
 	int maxPosts = 10;
-	String theme = "";
+	String activeTheme = "";
 	String defaultAuthor = "";
 	boolean displayCreatedDate = true;
 	boolean displayUpdatedDate = true;
@@ -34,6 +34,7 @@ public class WebsiteInfo {
 	String authorsDir = "authors";
 	String tagsDir = "tags";
 	String categoriesDir = "categories";
+	String staticContentDir = "static";
 	String tempDir = "temp";
 	String themesDir = "themes";
 	String generatedHtmlDir = "dist";

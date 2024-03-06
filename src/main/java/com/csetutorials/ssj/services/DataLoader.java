@@ -2,15 +2,14 @@ package com.csetutorials.ssj.services;
 
 import com.csetutorials.ssj.beans.*;
 import com.csetutorials.ssj.contants.SSJPaths;
+import com.csetutorials.ssj.exceptions.ThemeException;
 import com.csetutorials.ssj.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+
 @Service
 public class DataLoader {
 
@@ -24,6 +23,10 @@ public class DataLoader {
 	PostService postService;
 	@Autowired
 	PageService pageService;
+	@Autowired
+	ThemeService themeService;
+	@Autowired
+	TemplateService templateService;
 
 	public void load(String baseDir) {
 		setBaseDir(baseDir);
@@ -33,6 +36,11 @@ public class DataLoader {
 		loadCategories();
 		loadTags();
 		loadPosts();
+		loadPages();
+		loadActiveTheme();
+		loadThemeConfig();
+		loadTemplates();
+		loadTemplateContext();
 	}
 
 	private void setBaseDir(String baseDir) {
@@ -45,11 +53,11 @@ public class DataLoader {
 
 	private void loadWebsiteConfig() {
 		String configFile = configuration.getBaseDir() + File.separator + "ssj.json";
-		configuration.setWebsiteInfo(jsonService.convert(fileService.getString(configFile), WebsiteInfo.class));
+		configuration.setWebsite(jsonService.convert(fileService.getString(configFile), WebsiteInfo.class));
 	}
 
 	private void loadSsjPaths() {
-		configuration.setSsjPaths(new SSJPaths(configuration.getBaseDir(), configuration.getWebsiteInfo()));
+		configuration.setSsjPaths(new SSJPaths(configuration.getBaseDir(), configuration.getWebsite()));
 	}
 
 	private void loadAuthors() {
@@ -58,7 +66,7 @@ public class DataLoader {
 			String content = fileService.getString(authorFile);
 			Author author = jsonService.convert(content, Author.class);
 			String username = author.getUsername();
-			String url = configuration.getWebsiteInfo().getBaseUrl() + "/" + configuration.getWebsiteInfo().getAuthorBase() + "/" + username;
+			String url = configuration.getWebsite().getBaseUrl() + "/" + configuration.getWebsite().getAuthorBase() + "/" + username;
 			url = StringUtils.removeExtraSlash(url);
 			author.setUrl(url);
 			authors.add(author);
@@ -72,7 +80,7 @@ public class DataLoader {
 		for (File authorFile : fileService.listFiles(configuration.getSsjPaths().getCategoriesDir())) {
 			String content = fileService.getString(authorFile);
 			Category category = jsonService.convert(content, Category.class);
-			String url = configuration.getWebsiteInfo().getBaseUrl() + "/" + configuration.getWebsiteInfo().getCategoryBase() + "/" + category.getShortcode();
+			String url = configuration.getWebsite().getBaseUrl() + "/" + configuration.getWebsite().getCategoryBase() + "/" + category.getShortcode();
 			url = StringUtils.removeExtraSlash(url);
 			category.setUrl(url);
 			categories.add(category);
@@ -86,7 +94,7 @@ public class DataLoader {
 		for (File authorFile : fileService.listFiles(configuration.getSsjPaths().getTagsDir())) {
 			String content = fileService.getString(authorFile);
 			Tag tag = jsonService.convert(content, Tag.class);
-			String url = configuration.getWebsiteInfo().getBaseUrl() + "/" + configuration.getWebsiteInfo().getCategoryBase() + "/" + tag.getShortcode();
+			String url = configuration.getWebsite().getBaseUrl() + "/" + configuration.getWebsite().getCategoryBase() + "/" + tag.getShortcode();
 			url = StringUtils.removeExtraSlash(url);
 			tag.setUrl(url);
 			tags.add(tag);
@@ -102,4 +110,34 @@ public class DataLoader {
 	private void loadPages() {
 		configuration.setPages(pageService.readPages());
 	}
+
+	private void loadActiveTheme() {
+		configuration.setActiveThemeDir(themeService.getActiveThemeDir());
+	}
+
+	private void loadThemeConfig() {
+		String activeThemeDir = configuration.getActiveThemeDir();
+		File themeConfigFile = new File(activeThemeDir + File.separator + "themeConfig.json");
+		if (!themeConfigFile.exists()) {
+			throw new ThemeException("Couldn't find themeConfig.json in theme directory - " + activeThemeDir);
+		}
+		String json = fileService.getString(themeConfigFile);
+		ThemeConfig themeConfig = jsonService.convert(json, ThemeConfig.class);
+		configuration.setThemeConfig(themeConfig);
+	}
+
+	private void loadTemplates() {
+	}
+
+	private void loadTemplateContext() {
+		Map<String, Object> map = new HashMap<>();
+		map.put("website", configuration.getWebsite());
+		map.put("posts", configuration.getPosts());
+		map.put("pages", configuration.getPages());
+		map.put("categories", configuration.getCategories());
+		map.put("tags", configuration.getTags());
+		map.put("authors", configuration.getAuthors());
+		configuration.setContext(map);
+	}
+
 }

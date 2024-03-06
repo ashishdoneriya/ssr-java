@@ -1,9 +1,18 @@
 package com.csetutorials.ssj.utils;
 
+import org.commonmark.Extension;
+import org.commonmark.ext.gfm.tables.TablesExtension;
+import org.commonmark.ext.heading.anchor.HeadingAnchorExtension;
+import org.commonmark.node.Node;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.List;
 
 public class StringUtils {
 
@@ -37,6 +46,14 @@ public class StringUtils {
 			}
 			return sb.toString();
 		}
+	}
+
+	public static String parseMarkdown(String content) {
+		List<Extension> extensions = Arrays.asList(TablesExtension.create(), HeadingAnchorExtension.create());
+		Parser parser = Parser.builder().extensions(extensions).build();
+		Node document = parser.parse(content);
+		HtmlRenderer renderer = HtmlRenderer.builder().extensions(extensions).build();
+		return renderer.render(document);
 	}
 
 }

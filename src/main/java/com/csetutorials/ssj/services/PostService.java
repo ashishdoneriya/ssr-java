@@ -26,13 +26,13 @@ public class PostService {
 	Configuration configuration;
 
 	public List<Post> readPosts() {
-		String separator = Pattern.quote(configuration.getWebsiteInfo().getPostsMetaDataSeparator());
+		String separator = Pattern.quote(configuration.getWebsite().getPostsMetaDataSeparator());
 		Pattern pattern = Pattern.compile(separator + "(.+)" + separator + "(.+)", Pattern.MULTILINE);
 
 		Yaml yaml = new Yaml();
 		List<Post> posts = new ArrayList<>();
-		SimpleDateFormat parseSdf = new SimpleDateFormat(configuration.getWebsiteInfo().getPostsMetaDateFormat());
-		SimpleDateFormat formatSdf = new SimpleDateFormat(configuration.getWebsiteInfo().getPostsDisplayDateFormat());
+		SimpleDateFormat parseSdf = new SimpleDateFormat(configuration.getWebsite().getPostsMetaDateFormat());
+		SimpleDateFormat formatSdf = new SimpleDateFormat(configuration.getWebsite().getPostsDisplayDateFormat());
 
 		for (File file : fileService.listFiles(configuration.getSsjPaths().getPostsDir())) {
 			String fileContent = fileService.getString(file);
@@ -46,11 +46,11 @@ public class PostService {
 			if (meta.isDraft()) {
 				continue;
 			}
-			String postContent = matcher.group(2);
-			meta.setContent(postContent);
+			meta.setContent(matcher.group(2));
 
 			Post post = createPost(parseSdf, formatSdf, meta, file);
 			if (post != null) {
+				setContent(post, meta, file);
 				posts.add(post);
 			}
 		}
@@ -155,8 +155,12 @@ public class PostService {
 	}
 
 	private void setPostUrls(Post post, PostYmlParams meta) {
-		post.setUrl(StringUtils.removeExtraSlash("/" + configuration.getWebsiteInfo().getBaseUrl() + "/" + generatePostUrl(post, meta)));
-		post.setAbsoluteUrl(StringUtils.removeExtraSlash(configuration.getWebsiteInfo().getUrl() + post.getUrl()));
+		post.setUrl(StringUtils.removeExtraSlash("/" + configuration.getWebsite().getBaseUrl() + "/" + generatePostUrl(post, meta)));
+		post.setAbsoluteUrl(StringUtils.removeExtraSlash(configuration.getWebsite().getUrl() + post.getUrl()));
+	}
+
+	private void setContent(Post post, PostYmlParams meta, File file) {
+		post.setContent(file.getName().endsWith(".md") ? StringUtils.parseMarkdown(meta.getContent()) : meta.getContent());
 	}
 
 	private void sortPosts(List<Post> posts) {
@@ -175,13 +179,13 @@ public class PostService {
 	private String generatePostUrl(Post post, PostYmlParams meta) {
 		String slug = StringUtils.isNotBlank(meta.getSlug()) ? meta.getSlug().replaceAll(" +", "-") : post.getTitle().replaceAll("[^\\sa-zA-Z0-9]", "").replaceAll("\\s+", "-");
 		if (StringUtils.isNotBlank(slug)) {
-			return configuration.getWebsiteInfo().getPostPermalink().replace(":slug", slug.trim());
+			return configuration.getWebsite().getPostPermalink().replace(":slug", slug.trim());
 		}
 		String permalink = meta.getPermalink();
 		if (StringUtils.isNotBlank(permalink)) {
 			return permalink;
 		}
 		String newSlug = post.getTitle().replaceAll("[^\\sa-zA-Z0-9]", "").replaceAll("\\s+", "-");
-		return configuration.getWebsiteInfo().getPostPermalink().replace(":slug", newSlug);
+		return configuration.getWebsite().getPostPermalink().replace(":slug", newSlug);
 	}
 }
