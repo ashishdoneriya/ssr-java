@@ -7,11 +7,16 @@ import lombok.Setter;
 @Setter
 public class Author {
 
-	private String name;
-	private String username;
-	private String description;
-	private String imageUrl;
-	private SocialMediaLinks socialMediaLinks;
-	private String url;
+	String name = "";
+
+	String username = "";
+
+	String description = "";
+
+	String imageUrl = "";
+
+	SocialMediaLinks socialMediaLinks = new SocialMediaLinks();
+
+	String url;
 
 }

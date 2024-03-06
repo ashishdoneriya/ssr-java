@@ -3,26 +3,28 @@ package com.csetutorials.ssj.beans;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.File;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 @Getter
 @Setter
-public class Page {
+public class PostYmlParams {
 
 	boolean isDraft;
 	String title;
 	String seoTitle;
 	String description;
 	String seoDescription;
-	Date created;
-	Date updated;
-	String createdUIDate;
-	String updatedUIDate;
-	Author author;
+	String created;
+	String updated;
+	String slug;
+	String permalink;
 	String url;
 	String absoluteUrl;
+	List<String> tags;
+	List<String> categories;
+	String author;
+	Page next, previous;
+	String featuredImage;
+	String content;
 
 }

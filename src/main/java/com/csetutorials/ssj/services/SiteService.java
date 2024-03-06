@@ -2,17 +2,9 @@ package com.csetutorials.ssj.services;
 
 import com.csetutorials.ssj.beans.*;
 import com.csetutorials.ssj.contants.Layouts;
-import com.csetutorials.ssj.contants.PathService;
-import com.csetutorials.ssj.exceptions.JsonParsingException;
-import com.csetutorials.ssj.exceptions.ThemeException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.csetutorials.ssj.contants.SSJPaths;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.Ref;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -28,7 +20,7 @@ import java.util.Map.Entry;
 public class SiteService {
 
 	@Autowired
-	PathService pathService;
+	SSJPaths SSJPaths;
 	@Autowired
 	TemplateService templateService;
 	@Autowired
@@ -55,22 +47,22 @@ public class SiteService {
 		return map;
 	}
 
-	public void generateLatestPostsPages(WebsiteConfig websiteConfig) {
-		if (templateService.isTemplateNotAvailable(websiteConfig, Layouts.latestPosts)) {
+	public void generateLatestPostsPages(WebsiteInfo websiteInfo) {
+		if (templateService.isTemplateNotAvailable(websiteInfo, Layouts.latestPosts)) {
 			return;
 		}
 
-		VelocityEngine engine = websiteConfig.getVelocityEngine();
+		VelocityEngine engine = websiteInfo.getVelocityEngine();
 		VelocityContext context = new VelocityContext();
 
-		context.put("site", websiteConfig.getRawConfig());
+		context.put("site", websiteInfo.getRawConfig());
 		context.put("contentType", "latestPosts");
-		context.put("data", websiteConfig.getData());
+		context.put("data", websiteInfo.getData());
 		context.put("dateUtils", new DateUtils());
 
-		int maxPosts = websiteConfig.getMaxPosts();
-		List<Page> posts = websiteConfig.getPosts();
-		if (!websiteConfig.isPaginationEnabled()) {
+		int maxPosts = websiteInfo.getMaxPosts();
+		List<Page> posts = websiteInfo.getPosts();
+		if (!websiteInfo.isPaginationEnabled()) {
 			maxPosts = posts.size();
 		}
 		int totalPages = (int) Math.ceil(posts.size() / (maxPosts * 1.0));
@@ -86,42 +78,42 @@ public class SiteService {
 			paginator.setTotalPosts(posts.size());
 
 			if (i != totalPages) {
-				String nextPageUrl = websiteConfig.getBaseUrl() + "/" + websiteConfig.getLatestPostsBase() + "/page/" + i;
+				String nextPageUrl = websiteInfo.getBaseUrl() + "/" + websiteInfo.getLatestPostsBase() + "/page/" + i;
 				nextPageUrl = StringUtils.removeExtraSlash(nextPageUrl);
 				paginator.setNextPageUrl(nextPageUrl);
 			} else if (i != 1) {
-				String previousPageUrl = websiteConfig.getBaseUrl() + "/" + websiteConfig.getLatestPostsBase()
+				String previousPageUrl = websiteInfo.getBaseUrl() + "/" + websiteInfo.getLatestPostsBase()
 						+ (i == 2 ? "" : "/page/" + i);
 				previousPageUrl = StringUtils.removeExtraSlash(previousPageUrl);
 				paginator.setPreviousPageUrl(previousPageUrl);
 			}
-			String currentPageFilePath = pathService.getGeneratedHtmlDir() + File.separator + websiteConfig.getBaseUrl()
-					+ File.separator + websiteConfig.getLatestPostsBase() + File.separator
+			String currentPageFilePath = SSJPaths.getGeneratedHtmlDir() + File.separator + websiteInfo.getBaseUrl()
+					+ File.separator + websiteInfo.getLatestPostsBase() + File.separator
 					+ (i == 1 ? "index.html" : "/page" + File.separator + i + File.separator + "index.html");
 			context.put("paginator", paginator);
-			String pageLayoutContent = templateService.formatContent(engine, context, websiteConfig.getLatestPostsLayout());
+			String pageLayoutContent = templateService.formatContent(engine, context, websiteInfo.getLatestPostsLayout());
 			pageLayoutContent = Jsoup.parse(pageLayoutContent).toString();
 			fileService.write(currentPageFilePath, pageLayoutContent);
 		}
 	}
 
-	public void generateCategoriesPages(WebsiteConfig websiteConfig, Map<CatTag, List<Page>> catsWithRelatedPosts) {
-		if (templateService.isTemplateNotAvailable(websiteConfig, Layouts.category)) {
+	public void generateCategoriesPages(WebsiteInfo websiteInfo, Map<Category, List<Page>> catsWithRelatedPosts) {
+		if (templateService.isTemplateNotAvailable(websiteInfo, Layouts.category)) {
 			return;
 		}
 
-		VelocityEngine engine = websiteConfig.getVelocityEngine();
+		VelocityEngine engine = websiteInfo.getVelocityEngine();
 		VelocityContext context = new VelocityContext();
-		context.put("site", websiteConfig.getRawConfig());
+		context.put("site", websiteInfo.getRawConfig());
 		context.put("contentType", "category");
-		context.put("data", websiteConfig.getData());
+		context.put("data", websiteInfo.getData());
 		context.put("dateUtils", new DateUtils());
 
-		for (Entry<CatTag, List<Page>> entry : catsWithRelatedPosts.entrySet()) {
-			CatTag cat = entry.getKey();
+		for (Entry<Category, List<Page>> entry : catsWithRelatedPosts.entrySet()) {
+			Category cat = entry.getKey();
 			List<Page> catPosts = entry.getValue();
-			int maxPosts = websiteConfig.getMaxPosts();
-			if (!websiteConfig.isPaginationEnabled()) {
+			int maxPosts = websiteInfo.getMaxPosts();
+			if (!websiteInfo.isPaginationEnabled()) {
 				maxPosts = catPosts.size();
 			}
 			int totalPages = (int) Math.ceil(catPosts.size() / (maxPosts * 1.0));
@@ -138,47 +130,47 @@ public class SiteService {
 				paginator.setTotalPosts(catPosts.size());
 
 				if (i != totalPages) {
-					String nextPageUrl = websiteConfig.getBaseUrl() + "/" + websiteConfig.getCategoryBase() + "/"
+					String nextPageUrl = websiteInfo.getBaseUrl() + "/" + websiteInfo.getCategoryBase() + "/"
 							+ cat.getShortcode() + "/page/" + i;
 					nextPageUrl = StringUtils.removeExtraSlash(nextPageUrl);
 					paginator.setNextPageUrl(nextPageUrl);
 				} else if (i != 1) {
-					String previousPageUrl = websiteConfig.getBaseUrl() + "/" + websiteConfig.getCategoryBase() + "/"
+					String previousPageUrl = websiteInfo.getBaseUrl() + "/" + websiteInfo.getCategoryBase() + "/"
 							+ cat.getShortcode() + (i == 2 ? "" : "/page/" + i);
 					previousPageUrl = StringUtils.removeExtraSlash(previousPageUrl);
 					paginator.setPreviousPageUrl(previousPageUrl);
 				}
-				String currentPageFilePath = pathService.getGeneratedHtmlDir() + File.separator + websiteConfig.getBaseUrl()
-						+ File.separator + websiteConfig.getCategoryBase() + File.separator + cat.getShortcode()
+				String currentPageFilePath = SSJPaths.getGeneratedHtmlDir() + File.separator + websiteInfo.getBaseUrl()
+						+ File.separator + websiteInfo.getCategoryBase() + File.separator + cat.getShortcode()
 						+ File.separator
 						+ (i == 1 ? "index.html" : "/page" + File.separator + i + File.separator + "index.html");
 				context.put("paginator", paginator);
 				context.put("category", cat);
 				String pageLayoutContent = templateService.formatContent(engine, context,
-						websiteConfig.getCategoriesLayout());
+						websiteInfo.getCategoriesLayout());
 				pageLayoutContent = Jsoup.parse(pageLayoutContent).toString();
 				fileService.write(currentPageFilePath, pageLayoutContent);
 			}
 		}
 	}
 
-	public void generateTagsPages(WebsiteConfig websiteConfig, Map<CatTag, List<Page>> tagsWithRelatedPosts) {
-		if (templateService.isTemplateNotAvailable(websiteConfig, Layouts.tag)) {
+	public void generateTagsPages(WebsiteInfo websiteInfo, Map<Category, List<Page>> tagsWithRelatedPosts) {
+		if (templateService.isTemplateNotAvailable(websiteInfo, Layouts.tag)) {
 			return;
 		}
 
-		VelocityEngine engine = websiteConfig.getVelocityEngine();
+		VelocityEngine engine = websiteInfo.getVelocityEngine();
 		VelocityContext context = new VelocityContext();
-		context.put("site", websiteConfig.getRawConfig());
+		context.put("site", websiteInfo.getRawConfig());
 		context.put("contentType", "tag");
-		context.put("data", websiteConfig.getData());
+		context.put("data", websiteInfo.getData());
 		context.put("dateUtils", new DateUtils());
 
-		for (Entry<CatTag, List<Page>> entry : tagsWithRelatedPosts.entrySet()) {
-			CatTag tag = entry.getKey();
+		for (Entry<Category, List<Page>> entry : tagsWithRelatedPosts.entrySet()) {
+			Category tag = entry.getKey();
 			List<Page> tagPosts = entry.getValue();
-			int maxPosts = websiteConfig.getMaxPosts();
-			if (!websiteConfig.isPaginationEnabled()) {
+			int maxPosts = websiteInfo.getMaxPosts();
+			if (!websiteInfo.isPaginationEnabled()) {
 				maxPosts = tagPosts.size();
 			}
 			int totalPages = (int) Math.ceil(tagPosts.size() / (maxPosts * 1.0));
@@ -194,22 +186,22 @@ public class SiteService {
 				paginator.setTotalPosts(tagPosts.size());
 
 				if (i != totalPages) {
-					String nextPageUrl = websiteConfig.getBaseUrl() + "/" + websiteConfig.getTagBase() + "/" + tag.getName()
+					String nextPageUrl = websiteInfo.getBaseUrl() + "/" + websiteInfo.getTagBase() + "/" + tag.getName()
 							+ "/page/" + i;
 					nextPageUrl = StringUtils.removeExtraSlash(nextPageUrl);
 					paginator.setNextPageUrl(nextPageUrl);
 				} else if (i != 1) {
-					String previousPageUrl = websiteConfig.getBaseUrl() + "/" + websiteConfig.getTagBase() + "/"
+					String previousPageUrl = websiteInfo.getBaseUrl() + "/" + websiteInfo.getTagBase() + "/"
 							+ tag.getName() + (i == 2 ? "" : "/page/" + i);
 					previousPageUrl = StringUtils.removeExtraSlash(previousPageUrl);
 					paginator.setPreviousPageUrl(previousPageUrl);
 				}
-				String currentPageFilePath = pathService.getGeneratedHtmlDir() + File.separator + websiteConfig.getBaseUrl()
-						+ File.separator + websiteConfig.getTagBase() + File.separator + tag.getName() + File.separator
+				String currentPageFilePath = SSJPaths.getGeneratedHtmlDir() + File.separator + websiteInfo.getBaseUrl()
+						+ File.separator + websiteInfo.getTagBase() + File.separator + tag.getName() + File.separator
 						+ (i == 1 ? "index.html" : "/page" + File.separator + i + File.separator + "index.html");
 				context.put("paginator", paginator);
 				context.put("tag", tag);
-				String pageLayoutContent = templateService.formatContent(engine, context, websiteConfig.getTagsLayout());
+				String pageLayoutContent = templateService.formatContent(engine, context, websiteInfo.getTagsLayout());
 				pageLayoutContent = Jsoup.parse(pageLayoutContent).toString();
 				fileService.write(currentPageFilePath, pageLayoutContent);
 			}
@@ -225,16 +217,16 @@ public class SiteService {
 		return sub;
 	}
 
-	public void generatePosts(List<Page> pages, WebsiteConfig websiteConfig, boolean isPost) {
+	public void generatePosts(List<Page> pages, WebsiteInfo websiteInfo, boolean isPost) {
 		VelocityContext context = new VelocityContext();
-		VelocityEngine engine = websiteConfig.getVelocityEngine();
-		context.put("site", websiteConfig.getRawConfig());
+		VelocityEngine engine = websiteInfo.getVelocityEngine();
+		context.put("site", websiteInfo.getRawConfig());
 		context.put("contentType", isPost ? "post" : "page");
-		context.put("data", websiteConfig.getData());
+		context.put("data", websiteInfo.getData());
 		context.put("dateUtils", new DateUtils());
 		context.put("StringUtils", StringUtils.class);
 		final String metaTagsFormat = fileService.getResourceContent("post-meta-tags.html");
-		templateService.addTemplate(websiteConfig, "ssj-meta-tags", metaTagsFormat);
+		templateService.addTemplate(websiteInfo, "ssj-meta-tags", metaTagsFormat);
 		for (Page page : pages) {
 			if (page.isDraft()) {
 				continue;
@@ -245,9 +237,9 @@ public class SiteService {
 			if (page.getFile().getName().endsWith(".md") || page.getFile().getName().endsWith(".markdown")) {
 				content = templateService.parseMarkdown(content);
 			}
-			templateService.addTemplate(websiteConfig, "test-template-ssr", content);
+			templateService.addTemplate(websiteInfo, "test-template-ssr", content);
 			content = templateService.formatContent(engine, context, "test-template-ssr");
-			List<Image> images = extractImages(websiteConfig, content);
+			List<Image> images = extractImages(websiteInfo, content);
 			content = formatAnchorTags(content);
 			page.setImages(images);
 
@@ -258,11 +250,11 @@ public class SiteService {
 			String postLayoutContent = templateService.formatContent(engine, context, page.getLayout());
 			postLayoutContent = Jsoup.parse(postLayoutContent).toString();
 			write(page.getPermalink(), postLayoutContent,
-					isPost ? websiteConfig.isPostUglyUrlEnabled() : websiteConfig.isPageUglyUrlEnabled());
+					isPost ? websiteInfo.isPostUglyUrlEnabled() : websiteInfo.isPageUglyUrlEnabled());
 		}
 	}
 
-	private List<Image> extractImages(WebsiteConfig websiteConfig, String content) {
+	private List<Image> extractImages(WebsiteInfo websiteInfo, String content) {
 		Document doc = Jsoup.parse(content);
 		Elements imageElements = doc.select("img");
 		List<Image> images = new ArrayList<>(1);
@@ -270,10 +262,10 @@ public class SiteService {
 			String src = imageEle.attr("src");
 
 			if (!src.startsWith("http")) {
-				if (!src.startsWith("/") && !websiteConfig.getBaseUrl().equals("/")) {
-					src = websiteConfig.getBaseUrl() + src;
+				if (!src.startsWith("/") && !websiteInfo.getBaseUrl().equals("/")) {
+					src = websiteInfo.getBaseUrl() + src;
 				}
-				src = websiteConfig.getUrl() + "/" + src;
+				src = websiteInfo.getUrl() + "/" + src;
 				src = StringUtils.removeExtraSlash(src);
 			}
 
@@ -309,29 +301,29 @@ public class SiteService {
 
 	public void write(String permalink, String content, boolean uglyUrl) {
 		permalink = "/" + permalink + (uglyUrl ? "" : "/index.html");
-		String path = pathService.getGeneratedHtmlDir() + permalink;
+		String path = SSJPaths.getGeneratedHtmlDir() + permalink;
 		path = path.replaceAll("/+", "/").replaceAll("/", File.separator);
 		File file = new File(path);
 		fileService.mkdirs(file.getParentFile());
 		fileService.write(file.getAbsolutePath(), content);
 	}
 
-	public void generateAuthorsPages(WebsiteConfig websiteConfig, Map<String, List<Page>> authorsPostsMap) {
-		if (templateService.isTemplateNotAvailable(websiteConfig, Layouts.author)) {
+	public void generateAuthorsPages(WebsiteInfo websiteInfo, Map<String, List<Page>> authorsPostsMap) {
+		if (templateService.isTemplateNotAvailable(websiteInfo, Layouts.author)) {
 			return;
 		}
 
-		VelocityEngine engine = websiteConfig.getVelocityEngine();
+		VelocityEngine engine = websiteInfo.getVelocityEngine();
 		VelocityContext context = new VelocityContext();
-		context.put("site", websiteConfig.getRawConfig());
+		context.put("site", websiteInfo.getRawConfig());
 		context.put("contentType", "author");
-		context.put("data", websiteConfig.getData());
+		context.put("data", websiteInfo.getData());
 		context.put("dateUtils", new DateUtils());
 		for (Entry<String, List<Page>> entry : authorsPostsMap.entrySet()) {
 			String authorName = entry.getKey();
 			List<Page> authorPosts = entry.getValue();
-			int maxPosts = websiteConfig.getMaxPosts();
-			if (!websiteConfig.isPaginationEnabled()) {
+			int maxPosts = websiteInfo.getMaxPosts();
+			if (!websiteInfo.isPaginationEnabled()) {
 				maxPosts = authorPosts.size();
 			}
 			int totalPages = (int) Math.ceil(authorPosts.size() / (maxPosts * 1.0));
@@ -347,22 +339,22 @@ public class SiteService {
 				paginator.setTotalPosts(authorPosts.size());
 
 				if (i != totalPages) {
-					String nextPageUrl = websiteConfig.getBaseUrl() + "/" + websiteConfig.getAuthorBase() + "/" + authorName
+					String nextPageUrl = websiteInfo.getBaseUrl() + "/" + websiteInfo.getAuthorBase() + "/" + authorName
 							+ "/page/" + i;
 					nextPageUrl = StringUtils.removeExtraSlash(nextPageUrl);
 					paginator.setNextPageUrl(nextPageUrl);
 				} else if (i != 1) {
-					String previousPageUrl = websiteConfig.getBaseUrl() + "/" + websiteConfig.getAuthorBase() + "/"
+					String previousPageUrl = websiteInfo.getBaseUrl() + "/" + websiteInfo.getAuthorBase() + "/"
 							+ authorName + (i == 2 ? "" : "/page/" + i);
 					previousPageUrl = StringUtils.removeExtraSlash(previousPageUrl);
 					paginator.setPreviousPageUrl(previousPageUrl);
 				}
-				String currentPageFilePath = pathService.getGeneratedHtmlDir() + File.separator + websiteConfig.getBaseUrl()
-						+ File.separator + websiteConfig.getAuthorBase() + File.separator + authorName + File.separator
+				String currentPageFilePath = SSJPaths.getGeneratedHtmlDir() + File.separator + websiteInfo.getBaseUrl()
+						+ File.separator + websiteInfo.getAuthorBase() + File.separator + authorName + File.separator
 						+ (i == 1 ? "index.html" : "/page" + File.separator + i + File.separator + "index.html");
 				context.put("paginator", paginator);
 				context.put("author", list.getFirst().getAuthor());
-				String pageLayoutContent = templateService.formatContent(engine, context, websiteConfig.getAuthorLayout());
+				String pageLayoutContent = templateService.formatContent(engine, context, websiteInfo.getAuthorLayout());
 				pageLayoutContent = Jsoup.parse(pageLayoutContent).toString();
 				fileService.write(currentPageFilePath, pageLayoutContent);
 			}

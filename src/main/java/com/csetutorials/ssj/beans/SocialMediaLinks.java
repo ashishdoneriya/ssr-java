@@ -1,21 +1,39 @@
 package com.csetutorials.ssj.beans;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.csetutorials.ssj.services.StringUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
 public class SocialMediaLinks {
 
-	private String facebookUrl, twitterUrl, instagram, linkedin, myspace, pinterest, youtube, wikipedia, website;
-	
-	private String twitterUsername;
+	String facebookUrl = "";
 
-	private transient List<String> list;
+	String twitterUrl = "";
+
+	String instagram = "";
+
+	String linkedin = "";
+
+	String myspace = "";
+
+	String pinterest = "";
+
+	String youtube = "";
+
+	String wikipedia = "";
+
+	String website = "";
+
+	String twitterUsername = "";
+
+	@JsonIgnore
+	private List<String> list = getSocialLinks();
 
 	public synchronized List<String> getSocialLinks() {
 		if (list != null) {
@@ -26,7 +44,7 @@ public class SocialMediaLinks {
 			list.add(facebookUrl);
 		}
 		if (StringUtils.isNotBlank(twitterUrl)) {
-			list.add(twitterUrl);
+			list.add(cleanTwitterUrl());
 		}
 		if (StringUtils.isNotBlank(instagram)) {
 			list.add(instagram);
@@ -48,5 +66,15 @@ public class SocialMediaLinks {
 		}
 		return list;
 	}
+
+	private String cleanTwitterUrl() {
+		int index = twitterUrl.lastIndexOf("/");
+		String twitterUsername = twitterUrl.substring(index + 1);
+		if (twitterUsername.contains("?")) {
+			twitterUsername = twitterUsername.substring(0, twitterUsername.indexOf('?'));
+		}
+		return twitterUsername;
+	}
+
 
 }

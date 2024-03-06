@@ -1,14 +1,12 @@
 package com.csetutorials.ssj.services;
 
-import com.csetutorials.ssj.beans.WebsiteConfig;
-import com.csetutorials.ssj.contants.PathService;
+import com.csetutorials.ssj.beans.WebsiteInfo;
+import com.csetutorials.ssj.contants.SSJPaths;
 import com.csetutorials.ssj.exceptions.JsonParsingException;
 import com.csetutorials.ssj.exceptions.ThemeException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Getter;
-import lombok.Setter;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Ref;
@@ -23,10 +21,10 @@ import java.util.Map;
 @Service
 public class WebsiteConfigService {
 
-	private WebsiteConfig config;
+	private WebsiteInfo config;
 
 	@Autowired
-	PathService pathService;
+	SSJPaths SSJPaths;
 	@Autowired
 	TemplateService templateService;
 	@Autowired
@@ -34,25 +32,25 @@ public class WebsiteConfigService {
 	@Autowired
 	JsonService jsonService;
 
-	public synchronized WebsiteConfig getSiteConfig() {
+	public synchronized WebsiteInfo getSiteConfig() {
 		if (config != null) {
 			return config;
 		}
-		String json = fileService.getString(pathService.getSiteConfigDir());
+		String json = fileService.getString(SSJPaths.getSiteConfigDir());
 		TypeReference<Map<String, Object>> type = new TypeReference<>(){};
 		Map<String, Object> rawConfig;
 		try {
 			rawConfig = (new ObjectMapper()).readValue(json, type);
 		} catch (JsonProcessingException e) {
-			throw new JsonParsingException("Problem while parsing json file for - " + pathService.getSiteConfigDir(), e);
+			throw new JsonParsingException("Problem while parsing json file for - " + SSJPaths.getSiteConfigDir(), e);
 		}
-		config = jsonService.convert(json, WebsiteConfig.class);
+		config = jsonService.convert(json, WebsiteInfo.class);
 		config.setRawConfig(rawConfig);
 		config.setActiveThemeDir(getActiveThemeDir(config));
 		return config;
 	}
 
-	private String getActiveThemeDir(WebsiteConfig config) {
+	private String getActiveThemeDir(WebsiteInfo config) {
 		String activeTheme = config.getTheme();
 		if (activeTheme != null) {
 
@@ -69,7 +67,7 @@ public class WebsiteConfigService {
 				}
 				String themeName = repo.substring(repo.lastIndexOf("/") + 1);
 				repo = repo + ".git";
-				File dir = new File(StringUtils.removeExtraSlash(pathService.getThemesDir() + File.separator + themeName));
+				File dir = new File(StringUtils.removeExtraSlash(SSJPaths.getThemesDir() + File.separator + themeName));
 				if (!fileService.listFiles(dir).isEmpty()) {
 					return dir.getAbsolutePath();
 				} else {
@@ -98,7 +96,7 @@ public class WebsiteConfigService {
 					return dir.getAbsolutePath();
 				}
 			} else {
-				File dir = new File(StringUtils.removeExtraSlash(pathService.getThemesDir() + File.separator + activeTheme));
+				File dir = new File(StringUtils.removeExtraSlash(SSJPaths.getThemesDir() + File.separator + activeTheme));
 				if (dir.exists() && dir.isDirectory()) {
 					return dir.getAbsolutePath();
 				} else {
@@ -108,7 +106,7 @@ public class WebsiteConfigService {
 			}
 
 		}
-		List<File> themes = fileService.listFiles(pathService.getThemesDir());
+		List<File> themes = fileService.listFiles(SSJPaths.getThemesDir());
 		if (themes.isEmpty()) {
 			throw new ThemeException("No theme found");
 		}

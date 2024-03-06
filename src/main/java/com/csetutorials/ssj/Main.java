@@ -2,7 +2,7 @@ package com.csetutorials.ssj;
 
 import com.csetutorials.ssj.beans.*;
 import com.csetutorials.ssj.contants.DefaultDirs;
-import com.csetutorials.ssj.contants.PathService;
+import com.csetutorials.ssj.contants.SSJPaths;
 import com.csetutorials.ssj.services.*;
 import org.apache.commons.cli.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ import java.util.Scanner;
 public class Main {
 
 	@Autowired
-	PathService pathService;
+	SSJPaths SSJPaths;
 	@Autowired
 	SiteService siteService;
 	@Autowired
@@ -35,41 +35,38 @@ public class Main {
 	@Autowired
 	WebsiteConfigService websiteConfigService;
 
+	@Autowired
+	DataLoader dataLoader;
+
 	public void process(String[] args) {
 
-		CommandLine cmd = getCommands(args);
+		dataLoader.load(getCommands(args).getOptionValue("build", new File("").getAbsolutePath()));
 
-		String root = cmd.getOptionValue("build", new File("").getAbsolutePath());
-		pathService.setRootDir(StringUtils.removeExtraSlash(root));
-		WebsiteConfig websiteConfig = websiteConfigService.getSiteConfig();
-		dataService.readData(websiteConfig);
-		dataService.loadAllAuthors(websiteConfig);
+		List<Page> posts = pageService.createPostsMetaData(websiteInfo);
+		List<Page> pages = pageService.createPagesMetaData(websiteInfo);
 
-		List<Page> posts = pageService.createPostsMetaData(websiteConfig);
-		List<Page> pages = pageService.createPagesMetaData(websiteConfig);
-
-		templateService.createEngine(websiteConfig);
-		Map<CatTag, List<Page>> tagsPosts = pageService.extractTagsWithRelatedPosts(posts);
-		Map<CatTag, List<Page>> catsPosts = pageService.extractCategoriesWithRelatedPosts(posts);
+		templateService.createEngine(websiteInfo);
+		Map<Category, List<Page>> tagsPosts = pageService.extractTagsWithRelatedPosts(posts);
+		Map<Category, List<Page>> catsPosts = pageService.extractCategoriesWithRelatedPosts(posts);
 		Map<String, List<Page>> authorsPosts = pageService.extractAuthorWithRelatedPosts(posts);
 
-		websiteConfig.getRawConfig().put("tags", pageService.extractTags(posts));
-		websiteConfig.getRawConfig().put("categories", pageService.extractCategories(posts));
-		websiteConfig.getRawConfig().put("tagPosts", tagsPosts);
-		websiteConfig.getRawConfig().put("categoriesPosts", catsPosts);
-		siteService.generatePosts(posts, websiteConfig, true);
-		siteService.generatePosts(pages, websiteConfig, false);
+		websiteInfo.getRawConfig().put("tags", pageService.extractTags(posts));
+		websiteInfo.getRawConfig().put("categories", pageService.extractCategories(posts));
+		websiteInfo.getRawConfig().put("tagPosts", tagsPosts);
+		websiteInfo.getRawConfig().put("categoriesPosts", catsPosts);
+		siteService.generatePosts(posts, websiteInfo, true);
+		siteService.generatePosts(pages, websiteInfo, false);
 
-		siteService.generateLatestPostsPages(websiteConfig);
-		siteService.generateCategoriesPages(websiteConfig, catsPosts);
-		siteService.generateTagsPages(websiteConfig, tagsPosts);
-		siteService.generateAuthorsPages(websiteConfig, authorsPosts);
-		sitemapCreator.createSiteMap(websiteConfig, posts, pages);
-		fileService.copyDirRecursively(websiteConfig.getActiveThemeDir() + File.separator + DefaultDirs.staticDir,
-				pathService.getGeneratedHtmlDir());
-		fileService.copyDirRecursively(pathService.getRootDir() + File.separator + DefaultDirs.staticDir,
-				pathService.getGeneratedHtmlDir());
-		fileService.deleteDir(new File(pathService.getTempDir()));
+		siteService.generateLatestPostsPages(websiteInfo);
+		siteService.generateCategoriesPages(websiteInfo, catsPosts);
+		siteService.generateTagsPages(websiteInfo, tagsPosts);
+		siteService.generateAuthorsPages(websiteInfo, authorsPosts);
+		sitemapCreator.createSiteMap(websiteInfo, posts, pages);
+		fileService.copyDirRecursively(websiteInfo.getActiveThemeDir() + File.separator + DefaultDirs.staticDir,
+				SSJPaths.getGeneratedHtmlDir());
+		fileService.copyDirRecursively(SSJPaths.getBaseDir() + File.separator + DefaultDirs.staticDir,
+				SSJPaths.getGeneratedHtmlDir());
+		fileService.deleteDir(new File(SSJPaths.getTempDir()));
 	}
 
 	private void generateSampleSite() {
@@ -79,7 +76,7 @@ public class Main {
 		if (title.isEmpty()) {
 			title = "My Site";
 		}
-		WebsiteConfig config = new WebsiteConfig();
+		WebsiteInfo config = new WebsiteInfo();
 		config.setTitle(title);
 
 		File file = new File("");

@@ -1,8 +1,8 @@
 package com.csetutorials.ssj.services;
 
-import com.csetutorials.ssj.beans.WebsiteConfig;
+import com.csetutorials.ssj.beans.WebsiteInfo;
 import com.csetutorials.ssj.contants.DefaultDirs;
-import com.csetutorials.ssj.contants.PathService;
+import com.csetutorials.ssj.contants.SSJPaths;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
@@ -28,11 +28,11 @@ import java.util.Map;
 public class TemplateService {
 
 	@Autowired
-	PathService pathService;
+	SSJPaths SSJPaths;
 	@Autowired
 	FileService fileService;
 
-	public void createEngine(WebsiteConfig config) {
+	public void createEngine(WebsiteInfo config) {
 		// Initialize the engine.
 		VelocityEngine engine = new VelocityEngine();
 		engine.setProperty(Velocity.RESOURCE_LOADER, "string");
@@ -44,7 +44,7 @@ public class TemplateService {
 				.getApplicationAttribute(StringResourceLoader.REPOSITORY_NAME_DEFAULT);
 
 		createLayouts(config);
-		for (File file : fileService.getFilesRecursively(pathService.getTempLayoutsDir())) {
+		for (File file : fileService.getFilesRecursively(SSJPaths.getTempLayoutsDir())) {
 			repo.putStringResource(file.getName(), fileService.getString(file.getAbsolutePath()));
 		}
 		repo.putStringResource("sitemap_index.xml", fileService.getResourceContent("sitemap_index.xml"));
@@ -52,7 +52,7 @@ public class TemplateService {
 		config.setVelocityEngine(engine);
 	}
 
-	public void addTemplate(WebsiteConfig config, String templateName, String templateContent) {
+	public void addTemplate(WebsiteInfo config, String templateName, String templateContent) {
 		// Initialize my template repository. You can replace the "Hello $w" with your
 		// String.
 		StringResourceRepository repo = (StringResourceRepository) config.getVelocityEngine()
@@ -60,7 +60,7 @@ public class TemplateService {
 		repo.putStringResource(templateName, templateContent);
 	}
 
-	public boolean isTemplateNotAvailable(WebsiteConfig config, String templateName) {
+	public boolean isTemplateNotAvailable(WebsiteInfo config, String templateName) {
 		return !config.getVelocityEngine().resourceExists(templateName);
 	}
 
@@ -79,21 +79,21 @@ public class TemplateService {
 		return renderer.render(document);
 	}
 
-	private void createLayouts(WebsiteConfig websiteConfig) {
+	private void createLayouts(WebsiteInfo websiteInfo) {
 		// Extracting themes layouts
 		for (File layoutFile : fileService
-				.getFilesRecursively(websiteConfig.getActiveThemeDir() + File.separator + DefaultDirs.layouts)) {
-			fileService.copyFile(layoutFile, new File(pathService.getTempLayoutsDir() + File.separator + layoutFile.getName()));
+				.getFilesRecursively(websiteInfo.getActiveThemeDir() + File.separator + DefaultDirs.layouts)) {
+			fileService.copyFile(layoutFile, new File(SSJPaths.getTempLayoutsDir() + File.separator + layoutFile.getName()));
 		}
 
-		for (File layoutFile : fileService.getFilesRecursively(pathService.getRootDir() + File.separator + DefaultDirs.layouts)) {
-			fileService.copyFile(layoutFile, new File(pathService.getTempLayoutsDir() + File.separator + layoutFile.getName()));
+		for (File layoutFile : fileService.getFilesRecursively(SSJPaths.getBaseDir() + File.separator + DefaultDirs.layouts)) {
+			fileService.copyFile(layoutFile, new File(SSJPaths.getTempLayoutsDir() + File.separator + layoutFile.getName()));
 		}
 
 		// Creating actual layouts
-		for (File templateFile : fileService.getFilesRecursively(pathService.getTempLayoutsDir())) {
-			String templateContent = generateTemplate(pathService.getTempLayoutsDir(), templateFile.getName());
-			fileService.write(pathService.getTempLayoutsDir() + File.separator + templateFile.getName(), templateContent);
+		for (File templateFile : fileService.getFilesRecursively(SSJPaths.getTempLayoutsDir())) {
+			String templateContent = generateTemplate(SSJPaths.getTempLayoutsDir(), templateFile.getName());
+			fileService.write(SSJPaths.getTempLayoutsDir() + File.separator + templateFile.getName(), templateContent);
 		}
 	}
 

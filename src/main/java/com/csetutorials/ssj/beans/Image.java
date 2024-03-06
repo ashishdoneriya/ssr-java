@@ -7,7 +7,8 @@ import lombok.Setter;
 @Setter
 public class Image {
 
-	private String src;
-	private String alt;
+	String src;
+
+	String alt;
 
 }

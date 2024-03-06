@@ -9,14 +9,22 @@ import java.util.List;
 @Setter
 public class Paginator {
 
-	private Integer currentPage;
-	private Integer totalPages;
-	private Integer postsPerPage;
-	private Integer totalPosts;
-	private List<Page> posts;
-	private Boolean hasNextPage;
-	private Boolean hasPreviousPage;
-	private String previousPageUrl;
-	private String nextPageUrl;
+	Integer currentPage;
+
+	Integer totalPages;
+
+	Integer postsPerPage;
+
+	Integer totalPosts;
+
+	List<Page> posts;
+
+	Boolean hasNextPage;
+
+	Boolean hasPreviousPage;
+
+	String previousPageUrl;
+
+	String nextPageUrl;
 
 }
