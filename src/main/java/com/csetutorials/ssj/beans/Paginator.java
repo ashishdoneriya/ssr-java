@@ -17,7 +17,7 @@ public class Paginator {
 
 	Integer totalPosts;
 
-	List<Page> posts;
+	List<Post> posts;
 
 	Boolean hasNextPage;
 

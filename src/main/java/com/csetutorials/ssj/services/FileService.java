@@ -1,6 +1,5 @@
 package com.csetutorials.ssj.services;
 
-import com.csetutorials.ssj.Main;
 import com.csetutorials.ssj.exceptions.FileSystemException;
 import com.csetutorials.ssj.utils.StringUtils;
 import org.springframework.stereotype.Service;
@@ -108,13 +107,13 @@ public class FileService {
 				os.write(buffer, 0, length);
 			}
 		} catch (IOException e) {
-			throw new FileSystemException("Problem while copying the file from [ " + source.getAbsolutePath() + "] to [ " + dest.getAbsolutePath() +" ]", e);
+			throw new FileSystemException("Problem while copying the file from [ " + source.getAbsolutePath() + "] to [ " + dest.getAbsolutePath() + " ]", e);
 		}
 	}
 
 	public String getResourceContent(String fileName) {
 		try {
-			return StringUtils.getString(Main.class.getResourceAsStream("/" + fileName));
+			return StringUtils.getString(FileService.class.getResourceAsStream("/" + fileName));
 		} catch (IOException e) {
 			throw new FileSystemException("Problem while fetching the content of resouce [ " + fileName + " ]", e);
 		}

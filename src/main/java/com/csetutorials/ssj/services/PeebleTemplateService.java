@@ -24,10 +24,10 @@ public class PeebleTemplateService {
 
 	Map<String, PebbleTemplate> templatesCache = new HashMap<>();
 
-	public void initialize(String themeDir) {
+	public void initialize() {
 		PebbleEngine.Builder builder = new PebbleEngine.Builder();
 		FileLoader loader = new FileLoader();
-		loader.setPrefix(themeDir);
+		loader.setPrefix(configuration.getActiveThemeDir());
 		loader.setSuffix(".html");
 		builder.loader(loader);
 		engine = builder.build();

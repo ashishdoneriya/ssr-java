@@ -25,8 +25,6 @@ public class DataLoader {
 	PageService pageService;
 	@Autowired
 	ThemeService themeService;
-	@Autowired
-	TemplateService templateService;
 
 	public void load(String baseDir) {
 		setBaseDir(baseDir);
@@ -39,7 +37,6 @@ public class DataLoader {
 		loadPages();
 		loadActiveTheme();
 		loadThemeConfig();
-		loadTemplates();
 		loadTemplateContext();
 	}
 
@@ -124,9 +121,6 @@ public class DataLoader {
 		String json = fileService.getString(themeConfigFile);
 		ThemeConfig themeConfig = jsonService.convert(json, ThemeConfig.class);
 		configuration.setThemeConfig(themeConfig);
-	}
-
-	private void loadTemplates() {
 	}
 
 	private void loadTemplateContext() {

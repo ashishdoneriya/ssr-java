@@ -1,6 +1,5 @@
 package com.csetutorials.ssj;
 
-import com.csetutorials.ssj.contants.DefaultDirs;
 import com.csetutorials.ssj.services.*;
 import org.apache.commons.cli.CommandLine;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +32,5 @@ public class SsjApplication implements CommandLineRunner {
 	public void run(String... args) {
 		dataLoader.load(commandLine.getOptionValue("build", new File("").getAbsolutePath()));
 		htmlPagesGenerator.generateHtmlPages();
-
 	}
 }

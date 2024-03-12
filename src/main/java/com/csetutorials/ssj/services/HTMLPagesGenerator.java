@@ -22,7 +22,7 @@ public class HTMLPagesGenerator {
 	FileService fileService;
 
 	public void generateHtmlPages() {
-
+		templateService.initialize();
 		generateIndex();
 		generatePostsIndex();
 		generatePosts();
@@ -45,11 +45,13 @@ public class HTMLPagesGenerator {
 
 	private void generatePostsIndex() {
 		try {
+			Paginator paginator = new Paginator();
 			if (!configuration.getWebsite().isPaginationEnabled()) {
 				String htmlContent = templateService.generatePostsIndexHtml(configuration.getPosts(), 1, 1);
 			} else {
 				List<List<Post>> outerList = divideList(configuration.getPosts(), configuration.getWebsite().getMaxPosts());
 				for (int i = 0; i < outerList.size(); i++) {
+
 					String htmlContent = templateService.generatePostsIndexHtml(outerList.get(i), i + 1, outerList.size());
 				}
 			}
